@@ -1,0 +1,90 @@
+:root {
+  /* Colors */
+  --color-navy: #003D6B;
+  --color-blue: #0088FF;
+  --color-blue-dark: #0070CC;
+  --color-blue-light: #F0F7FF;
+  --color-green: #28A745;
+  --color-green-light: #D4EDDA;
+  --color-red: #DC3545;
+  --color-red-dark: #B71C1C;
+  --color-red-light: #F8D7DA;
+  --color-yellow: #FFC107;
+  --color-yellow-light: #FFF3CD;
+  --color-orange: #FF9800;
+  --color-teal: #17A2B8;
+  --color-gray: #6C757D;
+  --color-gray-dark: #2C3E50;
+  --color-gray-light: #E0E0E0;
+  --color-gray-lighter: #F5F7FA;
+  --color-white: #FFFFFF;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-xxxl: 64px;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 28px;
+  --font-size-5xl: 32px;
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.2);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* Z-Index */
+  --z-dropdown: 100;
+  --z-sticky: 10;
+  --z-fixed: 100;
+  --z-modal: 1000;
+  --z-popover: 1001;
+  --z-tooltip: 1002;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 64px;
+  --header-height: 64px;
+  --max-width: 1440px;
+  --grid-gutter: 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-gray-lighter: #2C3E50;
+    --color-white: #1a1a1a;
+  }
+}

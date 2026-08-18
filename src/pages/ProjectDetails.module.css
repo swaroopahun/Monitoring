@@ -1,0 +1,279 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dfe7f1;
+}
+
+.eyebrow {
+  color: #2e7d32;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.metaRow {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #667085;
+  font-size: 12px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 96px;
+}
+
+.kpi span {
+  font-size: 10px;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+}
+
+.kpi strong {
+  font-size: 26px;
+  color: #111827;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.tabs button {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #475467;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tabActive {
+  background: #edf6ff !important;
+  border-color: #bfe1ff !important;
+  color: #0f172a !important;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 12px;
+}
+
+.mainPanel,
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.summaryGrid div {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.summaryGrid span {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #667085;
+  margin-bottom: 8px;
+}
+
+.summaryGrid strong {
+  font-size: 22px;
+  color: #111827;
+}
+
+.feed,
+.deviceList,
+.alarmList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feed li,
+.deviceList li,
+.alarmItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.feed li {
+  justify-content: flex-start;
+}
+
+.feedDot,
+.alarmMarker {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.critical { background: #ef4444; }
+.major { background: #f97316; }
+.warning { background: #f59e0b; }
+.info { background: #3b82f6; }
+
+.feed strong,
+.deviceList strong,
+.alarmItem strong {
+  display: block;
+  color: #111827;
+  margin-bottom: 3px;
+}
+
+.feed small,
+.deviceList small,
+.alarmItem small {
+  color: #667085;
+}
+
+.deviceList li {
+  align-items: center;
+}
+
+.alarmItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mapCanvas {
+  position: relative;
+  height: 220px;
+  background: linear-gradient(180deg, #edf4fa 0%, #e7eef5 100%);
+  border: 1px solid #dfeaf3;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mapContainer {
+  height: 100%;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableWrap th,
+.tableWrap td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #eef2f7;
+  font-size: 12px;
+}
+
+.tableWrap thead th {
+  font-size: 10px;
+  color: #475467;
+  background: #f8fafc;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 980px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
