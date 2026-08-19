@@ -9,8 +9,8 @@ type Detail = { id: string; soc: number; health: number; alarm: string; alarmTon
 const details: Detail[] = [
   { id: 'T_1_01', soc: 78, health: 90, alarm: 'Low Voltage, Offline', alarmTone: 'gray', project: 'Chandler' },
   { id: 'T_1_02', soc: 22, health: 20, alarm: 'High Temp', alarmTone: 'red', project: 'Chandler' },
-  { id: 'T_1_03', soc: 64, health: 70, alarm: 'Offline', alarmTone: 'gray', project: 'Mesa' },
-  { id: 'T_1_04', soc: 5, health: 20, alarm: 'High Temp', alarmTone: 'red', project: 'Tempe' },
+  { id: 'T_1_03', soc: 64, health: 70, alarm: 'Offline', alarmTone: 'gray', project: 'Chandler' },
+  { id: 'T_1_04', soc: 5, health: 20, alarm: 'High Temp', alarmTone: 'red', project: 'Chandler' },
   { id: 'T_1_05', soc: 7, health: 25, alarm: 'Low Voltage', alarmTone: 'amber', project: 'Chandler' },
   { id: 'T_2_01', soc: 82, health: 93, alarm: 'Normal', alarmTone: 'gray', project: 'Mesa' },
   { id: 'T_2_02', soc: 47, health: 54, alarm: 'Low Voltage', alarmTone: 'amber', project: 'Tempe' },

@@ -19,7 +19,7 @@
 
 .mainContent {
   padding: 10px 18px 20px;
-  min-height: calc(100vh - 56px);
+  min-height: 100vh;
 }
 
 @media (max-width: 768px) {

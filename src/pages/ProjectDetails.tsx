@@ -48,9 +48,9 @@ const ProjectDetails = () => {
 
       <div className={styles.tabs}> 
         <button className={styles.tabActive} type="button">Overview</button>
-        <button type="button">Analytics</button>
-        <button type="button">Alarms</button>
         <button type="button">Devices</button>
+        <button type="button">Battery</button>
+        <button type="button">Alarms</button>
         <button type="button">Communication</button>
         <button type="button">Performance</button>
         <button type="button">Map</button>

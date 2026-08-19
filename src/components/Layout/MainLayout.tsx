@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Header from './Header'
 import Sidebar from './Sidebar'
 import styles from './MainLayout.module.css'
 
@@ -15,7 +14,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <div className={`${styles.layoutShell} ${isSidebarCollapsed ? styles.sidebarCollapsed : ''}`}>
       <Sidebar isCollapsed={isSidebarCollapsed} onCollapseChange={setIsSidebarCollapsed} />
       <div className={styles.contentShell} style={{ flexBasis: `calc(100% - ${sidebarWidth}px)`, marginLeft: sidebarWidth, width: `calc(100% - ${sidebarWidth}px)` }}>
-        <Header />
         <main className={styles.mainContent}>{children}</main>
       </div>
     </div>

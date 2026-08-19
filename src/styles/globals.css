@@ -60,6 +60,10 @@ input, textarea, select {
   font-size: inherit;
 }
 
+button {
+  font-size: inherit;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
