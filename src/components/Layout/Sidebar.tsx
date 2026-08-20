@@ -3,8 +3,8 @@ import styles from './Sidebar.module.css'
 
 const navItems = [
   { label: 'Dashboard', path: '/', icon: '▦' },
-  { label: 'Projects', path: '/project-details', icon: '◫' },
-  { label: 'Battery Overview', path: '/battery', icon: '🔋' },
+  { label: 'Projects', path: '/projects', icon: '◫' },
+  { label: 'Battery', path: '/battery', icon: '🔋' },
 ]
 
 interface SidebarProps {
@@ -17,15 +17,15 @@ const Sidebar = ({ isCollapsed, onCollapseChange }: SidebarProps) => {
   return (
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.sidebarCollapsed : ''}`} style={{ width: isCollapsed ? 76 : 220 }}>
       <div className={styles.brand}>
-        <div className={styles.brandLogo}>A</div>
         <div className={styles.brandText}>Array Monitoring</div>
         <button
           type="button"
           className={styles.collapseToggle}
           onClick={() => onCollapseChange(!isCollapsed)}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {isCollapsed ? '›' : '‹'}
+          {isCollapsed ? '>' : '<'}
         </button>
       </div>
 

@@ -1,10 +1,14 @@
 .mapCard {
   position: relative;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .mapFrame {
   position: relative;
+  width: 100%;
   height: 415px;
   overflow: hidden;
   border-radius: 0;
@@ -18,6 +22,26 @@
 
 .map :global(.leaflet-control-zoom) {
   margin: 14px;
+  border: 1px solid #17394f !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgb(8 34 50 / 30%) !important;
+  overflow: hidden;
+}
+
+.map :global(.leaflet-control-zoom-in),
+.map :global(.leaflet-control-zoom-out) {
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  color: #16324a !important;
+  background: rgb(255 255 255 / 96%) !important;
+}
+
+.map :global(.leaflet-control-zoom-in:hover),
+.map :global(.leaflet-control-zoom-out:hover) {
+  background: #edf2f7 !important;
 }
 
 .map :global(.leaflet-interactive) {
