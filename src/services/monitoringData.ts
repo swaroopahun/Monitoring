@@ -19,6 +19,15 @@ export interface Project {
   lastUpdated: string
   lat: number
   lng: number
+  customer: string
+  country: string
+  region: string
+  supplier: string
+  blindingPercent: number
+  concentrators: number
+  controllers: number
+  meteoStations: number
+  powerMWdc: number
 }
 
 export interface Device {
@@ -88,6 +97,15 @@ const projectSeed: Project[] = [
     lastUpdated: new Date().toISOString(),
     lat: 33.4484,
     lng: -112.074,
+    customer: 'Array Technologies',
+    country: 'USA',
+    region: 'Southwest',
+    supplier: 'Nextracker',
+    blindingPercent: 99,
+    concentrators: 6,
+    controllers: 214,
+    meteoStations: 2,
+    powerMWdc: 30,
   },
   {
     id: 'coastal-storage',
@@ -103,6 +121,15 @@ const projectSeed: Project[] = [
     lastUpdated: new Date().toISOString(),
     lat: 32.7157,
     lng: -117.1611,
+    customer: 'Coastal Energy Partners',
+    country: 'USA',
+    region: 'West',
+    supplier: 'GameChange Solar',
+    blindingPercent: 94,
+    concentrators: 5,
+    controllers: 186,
+    meteoStations: 2,
+    powerMWdc: 26,
   },
   {
     id: 'midwest-grid',
@@ -118,6 +145,15 @@ const projectSeed: Project[] = [
     lastUpdated: new Date().toISOString(),
     lat: 41.8781,
     lng: -87.6298,
+    customer: 'Midwest Grid Cooperative',
+    country: 'USA',
+    region: 'Midwest',
+    supplier: 'FTC Solar',
+    blindingPercent: 100,
+    concentrators: 7,
+    controllers: 247,
+    meteoStations: 3,
+    powerMWdc: 35,
   },
   {
     id: 'desert-peak',
@@ -133,6 +169,15 @@ const projectSeed: Project[] = [
     lastUpdated: new Date().toISOString(),
     lat: 36.1699,
     lng: -115.1398,
+    customer: 'Desert Peak Energy LLC',
+    country: 'USA',
+    region: 'Southwest',
+    supplier: 'Nextracker',
+    blindingPercent: 87,
+    concentrators: 4,
+    controllers: 132,
+    meteoStations: 1,
+    powerMWdc: 18,
   },
 ]
 
@@ -285,6 +330,26 @@ export const formatLiveTimestamp = (isoDate: string) =>
     minute: '2-digit',
     second: '2-digit',
   }).format(new Date(isoDate))
+
+export const getCommStatus = (communicationHealth: number): Device['communication'] => {
+  if (communicationHealth >= 95) return 'Strong'
+  if (communicationHealth >= 85) return 'Stable'
+  if (communicationHealth >= 70) return 'Weak'
+  return 'Lost'
+}
+
+export const getPlantStatusLabel = (status: ProjectStatus) => {
+  switch (status) {
+    case 'healthy':
+      return 'In Operation'
+    case 'warning':
+      return 'In Commissioning'
+    case 'critical':
+      return 'Under Maintenance'
+    default:
+      return 'Offline'
+  }
+}
 
 export const getStatusTone = (status: string) => {
   switch (status) {
