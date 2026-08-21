@@ -19,8 +19,8 @@ const Projects = () => {
     <div className={styles.projects}>
       <div className={styles.header}>
         <div>
-          <h1>Projects</h1>
-          <p>{projects.length} total · {projects.filter((project) => project.status === 'healthy').length} online</p>
+          <h1>Project Details</h1>
+          <p>{projects.length} Total • {projects.filter((project) => project.status === 'healthy').length} Online</p>
         </div>
       </div>
 

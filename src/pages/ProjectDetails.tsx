@@ -41,9 +41,7 @@ const ProjectDetails = () => {
   const { projects, devices, alarms, lastUpdated } = useMonitoring()
 
   const [deviceSearch, setDeviceSearch] = useState('')
-  const [deviceType, setDeviceType] = useState('all')
   const [deviceStatus, setDeviceStatus] = useState('all')
-  const [alertsOnly, setAlertsOnly] = useState(false)
 
   const project = projects.find((item) => item.id === params.projectId) ?? projects[0]
   const activeSection: SectionKey | null = sections.find((item) => item.key === params.section)?.key ?? null
@@ -116,15 +114,11 @@ const ProjectDetails = () => {
     }
   }), [projectDevices])
 
-  const deviceTypes = useMemo(() => Array.from(new Set(projectDevices.map((device) => device.type))), [projectDevices])
-
   const filteredDeviceRows = deviceRows.filter(({ device, serialNumber }) => {
     const query = deviceSearch.trim().toLowerCase()
     const matchesSearch = !query || device.id.toLowerCase().includes(query) || serialNumber.toLowerCase().includes(query)
-    const matchesType = deviceType === 'all' || device.type === deviceType
-    const matchesStatus = deviceStatus === 'all' || device.status === deviceStatus
-    const matchesAlerts = !alertsOnly || device.activeAlarms > 0
-    return matchesSearch && matchesType && matchesStatus && matchesAlerts
+    const matchesStatus = deviceStatus === 'all' || (deviceStatus === 'alerts' ? device.activeAlarms > 0 : device.status === deviceStatus)
+    return matchesSearch && matchesStatus
   })
 
   const reportTypes = [
@@ -133,6 +127,61 @@ const ProjectDetails = () => {
     { id: 'devices', name: 'Device Inventory', description: 'Device list with type, status, and last communication.' },
     { id: 'communication', name: 'Communication Health', description: 'Signal quality and connectivity trend for this site.' },
   ]
+
+  const downloadCsv = (filename: string, rows: (string | number)[][]) => {
+    const escapeCell = (value: string | number) => {
+      const text = String(value)
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+    }
+    const csv = rows.map((row) => row.map(escapeCell).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleGenerateReport = (reportId: string) => {
+    const stamp = new Date().toISOString().slice(0, 10)
+    const filename = `${project.id}-${reportId}-${stamp}.csv`
+    if (reportId === 'performance') {
+      downloadCsv(filename, [
+        ['Report', 'Performance Summary'],
+        ['Project', project.name],
+        ['Reporting Period', 'Last 30 Days'],
+        ['Availability (%)', project.availability],
+        ['Total Energy (kWh)', totalEnergy],
+        ['Peak Power (kW)', peakPower],
+        ['Efficiency / Comm Quality (%)', roundPercent(project.communicationHealth)],
+        ['Active Alarms', project.activeAlarms],
+        ['Critical Alarms', project.criticalAlarms],
+      ])
+    } else if (reportId === 'alarms') {
+      downloadCsv(filename, [
+        ['Alarm ID', 'Severity', 'Device', 'Description', 'Date/Time', 'Status'],
+        ...projectAlarms.map((alarm) => [alarm.id, alarm.severity, alarm.deviceId, alarm.title, formatLiveTimestamp(alarm.startedAt), alarm.status]),
+      ])
+    } else if (reportId === 'devices') {
+      downloadCsv(filename, [
+        ['Device ID', 'Type', 'Serial Number', 'Last Seen', 'Tracker Angle', 'Parent NCU', 'Status'],
+        ...deviceRows.map(({ device, serialNumber, lastSeen, trackerAngle, parentNcu }) => [device.id, device.type, serialNumber, lastSeen, `${trackerAngle}°`, parentNcu, device.status]),
+      ])
+    } else if (reportId === 'communication') {
+      downloadCsv(filename, [
+        ['Communication Quality (%)', roundPercent(project.communicationHealth)],
+        ['Online Devices', project.devicesOnline],
+        ['Offline Devices', offlineDevices],
+        ['Last Communication', formatLiveTimestamp(project.lastUpdated)],
+        [],
+        ['Device ID', 'Communication', 'Last Seen'],
+        ...deviceRows.map(({ device, lastSeen }) => [device.id, device.communication, lastSeen]),
+      ])
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -178,8 +227,8 @@ const ProjectDetails = () => {
       </nav>
 
       {activeSection === null && (
-        <section className={styles.overviewHint}>
-          <strong>{project.name}</strong> is online and reporting live data. Select a module above — Device Details, Weather, Analytics, Alarms, Firmware Status, or Reports — to view its full details.
+        <section className={styles.overviewSection}>
+          <p className={styles.overviewHint}><strong>{project.name}</strong> is online and reporting live data. Select a module above — Device Details, Weather, Analytics, Alarms, Firmware Status, or Reports — to view its full details.</p>
         </section>
       )}
 
@@ -202,20 +251,13 @@ const ProjectDetails = () => {
             <div className={styles.widgetHeader}><h2>Device Details</h2><span>{filteredDeviceRows.length} of {deviceRows.length} devices</span></div>
             <div className={styles.deviceFilterBar}>
               <input type="search" aria-label="Search device ID or serial" placeholder="Search device ID or serial..." value={deviceSearch} onChange={(event) => setDeviceSearch(event.target.value)} />
-              <select aria-label="Filter device type" value={deviceType} onChange={(event) => setDeviceType(event.target.value)}>
-                <option value="all">All Types</option>
-                {deviceTypes.map((type) => <option key={type} value={type}>{type}</option>)}
-              </select>
               <select aria-label="Filter device status" value={deviceStatus} onChange={(event) => setDeviceStatus(event.target.value)}>
                 <option value="all">All Statuses</option>
                 <option value="online">Online</option>
-                <option value="warning">Warning</option>
                 <option value="offline">Offline</option>
+                <option value="warning">Warning</option>
+                <option value="alerts">Alerts</option>
               </select>
-              <label className={styles.alertsOnly}>
-                <input type="checkbox" checked={alertsOnly} onChange={(event) => setAlertsOnly(event.target.checked)} />
-                Show Alerts Only
-              </label>
             </div>
             <div className={styles.tableWrap}>
               <table>
@@ -276,10 +318,10 @@ const ProjectDetails = () => {
             <div className={styles.chartBoxLarge}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={energyTrend} margin={{ top: 6, right: 8, bottom: 0, left: -20 }}>
-                  <CartesianGrid stroke="#eef2f7" vertical={false} />
-                  <XAxis dataKey="time" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
-                  <Tooltip />
+                  <CartesianGrid stroke="#1f3f54" vertical={false} />
+                  <XAxis dataKey="time" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#9fb2bf' }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#9fb2bf' }} />
+                  <Tooltip contentStyle={{ background: '#0f2b3f', border: '1px solid #234a63', color: '#e8f1f5' }} itemStyle={{ color: '#e8f1f5' }} labelStyle={{ color: '#f4f8fb' }} />
                   <Line type="monotone" dataKey="energy" stroke="#4398f1" strokeWidth={2.5} dot={false} name="Energy (kWh)" />
                   <Line type="monotone" dataKey="power" stroke="#ffb000" strokeWidth={2.5} dot={false} name="Power (kW)" />
                 </LineChart>
@@ -370,7 +412,7 @@ const ProjectDetails = () => {
               <div key={report.id} className={styles.reportCard}>
                 <strong>{report.name}</strong>
                 <small>{report.description}</small>
-                <button type="button" className={styles.viewAll}>Generate Report →</button>
+                <button type="button" className={styles.viewAll} onClick={() => handleGenerateReport(report.id)}>Generate Report →</button>
               </div>
             ))}
           </div>

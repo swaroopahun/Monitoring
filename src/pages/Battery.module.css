@@ -2,11 +2,10 @@
 .pageTop { display: flex; align-items: end; justify-content: space-between; padding: 3px 0 8px; border-bottom: 1px solid #d5e0e9; }.pageTop h1 { color: #164b72; font-size: 15px; font-weight: 700; }.topFilters { display: flex; gap: 10px; }.selectField { display: grid; gap: 3px; color: #788795; font-size: 7px; }.selectField select { width: 105px; height: 25px; padding: 0 7px; border: 1px solid #d7e0e8; border-radius: 4px; color: #34495d; background: #fff; font-size: 9px; }
 .overviewGrid { display: grid; grid-template-columns: minmax(156px, .8fr) minmax(156px, .8fr) minmax(480px, 2.4fr); gap: 12px; margin-top: 12px; }.kpiStack { display: grid; gap: 12px; }.metricCard, .panel { border: 1px solid #dfe7ee; border-radius: 4px; background: #fff; box-shadow: 0 1px 1px rgb(20 58 87 / 3%); }.metricCard { min-height: 76px; padding: 13px; }.metricCard > span { display: block; color: #596879; font-size: 10px; }.kpiContent { display: flex; justify-content: space-between; align-items: end; margin-top: 13px; }.kpiContent > strong { color: #48515c; font-size: 18px; line-height: 1; }.kpiSide { display: grid; grid-template-columns: auto auto; column-gap: 4px; align-items: center; font-size: 8px; }.kpiSide span { text-align: right; font-weight: 700; }.kpiSide small { color: #6f7b87; font-size: 7px; }.danger { color: #f04444; }.warning { color: #e8a015; }.sizeCount { display: flex; gap: 28px; margin-top: 13px; }.sizeCount strong { color: #48515c; font-size: 18px; line-height: .8; }.sizeCount small { display: block; margin-top: 7px; color: #788795; font-size: 8px; font-weight: 600; }
 .panel { padding: 12px; }.panelTitle { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.panelTitle h2 { color: #536577; font-size: 10px; font-weight: 500; }.chartStats { display: flex; gap: 8px; font-size: 8px; white-space: nowrap; }.chartStats b { color: #20ad60; }.chartStats span { color: #d88b0c; }.chartStats i { color: #ec5555; font-style: normal; }.socPanel { height: 164px; }.socChart { height: 131px; margin-top: 2px; }
-.detailsGrid { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(0, 2.5fr); gap: 12px; margin-top: 4px; }.healthPanel, .tablePanel { height: 310px; }.donut { height: calc(100% - 18px); display: flex; flex-direction: column; justify-content: center; }.donutVisual { position: relative; height: 130px; }.donutCenter { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }.donutCenter strong { color: #536170; font-size: 18px; }.donutCenter span { color: #6e7b87; font-size: 7px; }.donutLegend { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; gap: 5px 13px; color: #556574; font-size: 7px; }.donutLegend span { white-space: nowrap; }.donutLegend i { display: inline-block; width: 6px; height: 6px; margin-right: 3px; border-radius: 50%; }
+.detailsGrid { display: grid; grid-template-columns: minmax(230px, .9fr) minmax(0, 2.5fr); gap: 12px; margin-top: 4px; }.healthPanel, .tablePanel { height: 310px; }.donut { height: calc(100% - 18px); display: flex; flex-direction: column; justify-content: center; gap: 6px; }.donutVisual { position: relative; height: 130px; }.donutCenter { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }.donutCenter strong { color: #536170; font-size: 18px; }.donutCenter span { color: #6e7b87; font-size: 7px; }.donutLegend { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; gap: 5px 13px; color: #556574; font-size: 7px; }.donutLegend span { white-space: nowrap; }.donutLegend i { display: inline-block; width: 6px; height: 6px; margin-right: 3px; border-radius: 50%; }
 .tablePanel { position: relative; padding: 11px 0 7px; }.tableHeader { display: flex; justify-content: space-between; padding: 0 12px 8px; }.filterButton { color: #547080; font-size: 15px; line-height: .6; }.filterBar { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 5px; padding: 0 12px 8px; }.filterBar input, .filterBar select { min-width: 0; height: 21px; border: 1px solid #d7e0e8; border-radius: 3px; padding: 0 5px; color: #536577; font-size: 8px; }.tableWrap table { width: 100%; border-collapse: collapse; }.tableWrap th { height: 27px; padding: 0 12px; color: #788795; font-size: 8px; font-weight: 500; text-align: left; border-bottom: 1px solid #cbd7e1; }.tableWrap td { height: 25px; padding: 0 12px; color: #657383; font-size: 8px; border-bottom: 1px solid #edf1f4; }.trackerLink { padding: 0; border: 0; color: #3985db; background: transparent; font: inherit; cursor: pointer; }.trackerLink:hover { text-decoration: underline; }.socBadge { display: inline-block; min-width: 21px; padding: 2px 4px; border-radius: 2px; color: #fff; background: #35b85e; font-size: 7px; font-weight: 700; text-align: center; }.socWarning { background: #ddac16; }.socDanger { background: #f04c28; }.alarmDot { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; }.red { background: #ef3434; }.amber { background: #f2bd19; }.gray { background: #c6cbd0; }.emptyRow { text-align: center; }.pagination { display: flex; justify-content: end; align-items: center; gap: 4px; margin: 6px 10px 0; }.pagination button { display: grid; width: 16px; height: 16px; place-items: center; border: 1px solid #dce5eb; border-radius: 50%; color: #8797a5; background: #fff; font-size: 8px; }.pagination span { color: #8594a0; }.pagination .pageActive { border-color: #b8ddea; background: #e5f4fa; color: #5195ad; }
 .bottomGrid { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(230px, .9fr); gap: 12px; margin-top: 12px; }.histogramPanel, .distributionPanel { height: 218px; }.histogram { height: 170px; }.axisLabel { color: #748292; font-size: 8px; text-align: center; }footer { padding: 17px 4px 4px; color: #91a0ab; font-size: 7px; text-align: right; }
 .modalBackdrop { position: fixed; z-index: 300; inset: 0 0 0 var(--sidebar-width, 220px); display: grid; place-items: center; padding: 18px; background: rgb(15 31 45 / 46%); }.telemetryModal { width: min(760px, calc(100% - 32px)); max-height: calc(100vh - 36px); overflow-y: auto; border: 1px solid #dbe4eb; border-radius: 8px; background: #fff; box-shadow: 0 16px 40px rgb(15 36 56 / 25%); padding: 14px; }.telemetryModal header { display: flex; justify-content: space-between; padding-bottom: 11px; border-bottom: 1px solid #e5edf2; }.telemetryModal h2 { color: #164b72; font-size: 15px; }.telemetryModal p { margin-top: 3px; color: #4f6170; font-size: 9px; }.telemetryModal p strong { color: #f0a200; font-size: 14px; margin-right: 6px; }.telemetryModal header small { color: #647585; font-size: 8px; }.telemetryModal header button { color: #164b72; font-size: 19px; }.telemetryGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-top: 10px; }.telemetry { height: 145px; padding: 9px; border: 1px solid #e5edf2; border-radius: 6px; }.telemetry h3 { color: #687c8e; font-size: 8px; font-weight: 600; text-transform: uppercase; }
-
 /* Larger, darker operational content fills each existing panel without changing the layout. */
 .page { color: #263a50; font-size: 13px; }
 .pageTop h1 { color: #123d62; font-size: 18px; }
@@ -26,21 +25,21 @@
 .histogramPanel, .distributionPanel { height: 250px; }.histogram { height: 198px; }.axisLabel { color: #52687a; font-size: 10px; }
 
 /* Prioritize legibility for live numeric monitoring data. */
-.page .panelTitle h2 { color: #163b5b; font-size: 14px; }
-.page .tableWrap th { color: #304d66; font-size: 11px; font-weight: 700; }
-.page .tableWrap td { color: #263f55; font-size: 12px; font-weight: 500; }
-.page .trackerLink { color: #1d70c9; font-weight: 600; }
+.page .panelTitle h2 { color: #f4f8fb; font-size: 14px; }
+.page .tableWrap th { color: #8ca4b5; font-size: 11px; font-weight: 700; }
+.page .tableWrap td { color: #c7d8e3; font-size: 12px; font-weight: 500; }
+.page .trackerLink { color: #63b6ff; font-weight: 600; }
 .page .socBadge { min-width: 30px; padding: 3px 5px; font-size: 10px; }
 .page .alarmDot { width: 8px; height: 8px; }
-.page .pagination button { width: 20px; height: 20px; color: #405a70; font-size: 10px; font-weight: 600; }
-.page .pagination span { color: #405a70; font-size: 11px; font-weight: 600; }
-.page .donutCenter strong { color: #183955; font-size: 27px; font-weight: 700; }
-.page .donutCenter span { color: #405a70; font-size: 11px; font-weight: 600; }
-.page .donutLegend { color: #304d66; font-size: 10px; font-weight: 600; }
-.page .axisLabel { color: #304d66; font-size: 11px; font-weight: 600; }
+.page .pagination button { width: 20px; height: 20px; color: #9fb2bf; font-size: 10px; font-weight: 600; }
+.page .pagination span { color: #8ca4b5; font-size: 11px; font-weight: 600; }
+.page .donutCenter strong { color: #ffffff; font-size: 27px; font-weight: 700; }
+.page .donutCenter span { color: #9fb2bf; font-size: 11px; font-weight: 600; }
+.page .donutLegend { color: #c3d5e0; font-size: 10px; font-weight: 600; }
+.page .axisLabel { color: #9fb2bf; font-size: 11px; font-weight: 600; }
 .page :global(.recharts-text),
 .page :global(.recharts-label),
-.page :global(.recharts-label-list text) { fill: #344f67 !important; font-size: 11px !important; font-weight: 600 !important; }
+.page :global(.recharts-label-list text) { fill: #9fb2bf !important; font-size: 11px !important; font-weight: 600 !important; }
 
 /* Keep the State of Charge panel level with the full left-hand KPI and details area. */
 @media (min-width: 761px) {
@@ -51,6 +50,58 @@
   .socChart { height: 181px; margin-top: 6px; }
 }
 @media (max-width: 760px) { .pageTop { align-items: start; flex-direction: column; gap: 10px; }.topFilters { width: 100%; }.selectField { flex: 1; }.selectField select { width: 100%; }.overviewGrid, .detailsGrid, .bottomGrid { grid-template-columns: 1fr; }.kpiStack { grid-template-columns: repeat(2, 1fr); }.socPanel, .healthPanel, .tablePanel, .histogramPanel, .distributionPanel { height: auto; min-height: 210px; }.filterBar { grid-template-columns: 1fr 1fr; }.telemetryGrid { grid-template-columns: 1fr; }.telemetryModal { max-height: 94vh; overflow-y: auto; } }
+
+/* Monitoring Portal visual language: match the dark navy theme used by Dashboard and Project Details. */
+.page { min-height: calc(100vh - 30px); padding: 18px; border: 1px solid #17394f; border-radius: 7px; background: #061d2d; color: #d7e6ef; }
+.pageTop { border-color: #1c4057; }
+.pageTop h1 { color: #f4f8fb; }
+.selectField { color: #8ca4b5; }
+.selectField select { border: 1px solid #27465a; border-radius: 4px; color: #d7e6ef; background: #0c2b40; }
+.metricCard, .panel { border: 1px solid #1b4057 !important; border-radius: 7px; background: #0a2436 !important; box-shadow: none !important; }
+.metricCard > span { color: #91a8b8; }
+.kpiContent > strong, .sizeCount strong { color: #f3f8fb; }
+.kpiSide small, .sizeCount small { color: #8ca4b5; }
+.panelTitle h2 { color: #f4f8fb; }
+.tableWrap th { border-bottom: 1px solid #1b4057; }
+.tableWrap td { border-bottom: 1px solid #16394d; }
+.trackerLink { color: #63b6ff; }
+.donutCenter strong { color: #ffffff; }
+.donutCenter span { color: #9fb2bf; }
+.donutLegend { color: #c3d5e0; }
+.axisLabel { color: #9fb2bf; }
+.pagination button { border: 1px solid #25445a; background: #0c2b40; color: #9fb2bf; }
+.pagination span { color: #8ca4b5; }
+.pagination .pageActive { border-color: #2f6f93; background: #123853; color: #bfe3ff; }
+.filterBar input, .filterBar select { border: 1px solid #27465a; color: #d7e6ef; background: #0c2b40; }
+footer { color: #7994a6; border-top: 1px solid #1c4057; }
+
+/* Battery donut hover panel: rendered only while hovering, so no permanent placeholder box. */
+.donut .donutRow { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-height: 0; }
+.donut .donutVisual { flex: 0 0 auto; width: 134px; height: 134px; }
+.donut .donutHoverPanel { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 8px 10px; border: 1px solid #1b4057; border-radius: 6px; background: #0d2c40; }
+.donut .donutHoverPanel strong { font-size: 11px; font-weight: 800; }
+.donut .donutHoverRow { display: flex; justify-content: space-between; gap: 8px; font-size: 9px; color: #9fb2bf; }
+.donut .donutHoverRow b { color: #fff; font-weight: 700; }
+.page .donutCenter strong { font-size: 28px; }
+.page .donutCenter span { font-size: 14px; }
+.telemetryModal { width: min(980px, calc(100% - 32px)); border: 1px solid #1b4057; background: #0a2436; box-shadow: 0 16px 40px rgb(0 0 0 / 45%); }
+.telemetryModal header { display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #1c4057; }
+.telemetryModal h2 { color: #f4f8fb; }
+.telemetryModal p { color: #c3d5e0; }
+.telemetryModal header small { color: #8ca4b5; }
+.telemetryModal header button { color: #f4f8fb; }
+.telemetry { border: 1px solid #1b4057; background: #0a2436; }
+.telemetry h3 { color: #91a8b8; }
+.modalHeaderTop { display: flex; align-items: flex-start; justify-content: space-between; }
+.modalHeaderBottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.telemetryModal .selectField { color: #8ca4b5; }
+.telemetryModal .selectField select { width: 140px; height: 28px; border: 1px solid #27465a; border-radius: 5px; background: #0c2b40; color: #d7e6ef; font-size: 11px; }
+.telemetryChartHeader { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 9px; margin-bottom: 8px; }
+.telemetryChartHeader h3 { width: 100%; margin: 0; }
+.telemetryChartHeader span { font-size: 9px; font-weight: 700; white-space: nowrap; }
+.max { color: #1ea85c; }
+.avg { color: #d58a00; }
+.min { color: #df4c4c; }
 
 /* Legacy Battery styles retained below for source history; inactive for this view.
 .page {

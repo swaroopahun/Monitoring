@@ -51,13 +51,13 @@ const Battery = () => {
     <section className={styles.overviewGrid}>
       <div className={styles.kpiStack}><KpiCard label="Total Batteries" value={`${1200 + liveOffset}`} /><KpiCard label="Operational" value={`${operational}`} side={<><span className={styles.danger}>{down}</span><small>down</small><span className={styles.warning}>{withAlarms}</span><small>with alarms</small></>} /></div>
       <div className={styles.kpiStack}><div className={styles.metricCard}><span>Battery Size Count</span><div className={styles.sizeCount}><strong>170<small>3AH</small></strong><strong>30<small>6AH</small></strong></div></div><KpiCard label="Avg. State of Charge" value={`${76 + Math.round(liveOffset / 8)}%`} /></div>
-      <section className={`${styles.panel} ${styles.socPanel}`}><PanelTitle title={`State of Charge - ${timeframe}`} right={<div className={styles.chartStats}><b>Max SoC: 75%</b><span>Avg SoC: 70%</span><i>Min SoC: 57%</i></div>} /><div className={styles.socChart}><ResponsiveContainer width="100%" height="100%"><AreaChart data={socChart} margin={{ top: 6, right: 44, bottom: 0, left: -18 }}><CartesianGrid stroke="#edf1f4" vertical={false} /><XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 8, fill: '#748292' }} /><YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} tickLine={false} axisLine={false} tick={{ fontSize: 8, fill: '#748292' }} /><Tooltip contentStyle={{ fontSize: 10, borderColor: '#dce5ed' }} /><ReferenceLine y={75} stroke="#52b970" strokeDasharray="3 3" label={{ value: 'High', fontSize: 8, fill: '#667' }} /><ReferenceLine y={50} stroke="#e5a429" strokeDasharray="4 3" label={{ value: 'Med', fontSize: 8, fill: '#667' }} /><ReferenceLine y={25} stroke="#e95454" strokeDasharray="4 3" label={{ value: 'Critical', fontSize: 8, fill: '#667' }} /><Area type="monotone" dataKey="minimum" name="Min SOC" stroke="#72a8f6" fill="#eff7ff" strokeWidth={1.5} /><Area type="monotone" dataKey="range" name="SOC Range" stroke="#8edfa8" fill="#d9f5e1" fillOpacity={.8} strokeWidth={1} /><Line type="monotone" dataKey="average" name="Average SOC" stroke="#35bd67" strokeWidth={2} dot={{ r: 2, fill: '#35bd67' }} /><Legend verticalAlign="bottom" height={18} iconType="circle" wrapperStyle={{ fontSize: 8 }} /></AreaChart></ResponsiveContainer></div></section>
+      <section className={`${styles.panel} ${styles.socPanel}`}><PanelTitle title={`State of Charge - ${timeframe}`} right={<div className={styles.chartStats}><b>Max SoC: 75%</b><span>Avg SoC: 70%</span><i>Min SoC: 57%</i></div>} /><div className={styles.socChart}><ResponsiveContainer width="100%" height="100%"><AreaChart data={socChart} margin={{ top: 6, right: 44, bottom: 0, left: -18 }}><CartesianGrid stroke="#1f3f54" vertical={false} /><XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 8, fill: '#9fb2bf' }} /><YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} tickLine={false} axisLine={false} tick={{ fontSize: 8, fill: '#9fb2bf' }} /><Tooltip contentStyle={{ fontSize: 10, background: '#0f2b3f', border: '1px solid #234a63', color: '#e8f1f5' }} itemStyle={{ color: '#e8f1f5' }} labelStyle={{ color: '#f4f8fb' }} /><ReferenceLine y={75} stroke="#52b970" strokeDasharray="3 3" label={{ value: 'High', fontSize: 8, fill: '#c3d5e0' }} /><ReferenceLine y={50} stroke="#e5a429" strokeDasharray="4 3" label={{ value: 'Med', fontSize: 8, fill: '#c3d5e0' }} /><ReferenceLine y={25} stroke="#e95454" strokeDasharray="4 3" label={{ value: 'Critical', fontSize: 8, fill: '#c3d5e0' }} /><Area type="monotone" dataKey="minimum" name="Min SOC" stroke="#72a8f6" fill="#123853" strokeWidth={1.5} /><Area type="monotone" dataKey="range" name="SOC Range" stroke="#8edfa8" fill="#12402c" fillOpacity={.8} strokeWidth={1} /><Line type="monotone" dataKey="average" name="Average SOC" stroke="#35bd67" strokeWidth={2} dot={{ r: 2, fill: '#35bd67' }} /><Legend verticalAlign="bottom" height={18} iconType="circle" wrapperStyle={{ fontSize: 8, color: '#c3d5e0' }} /></AreaChart></ResponsiveContainer></div></section>
     </section>
     <section className={styles.detailsGrid}>
-      <section className={`${styles.panel} ${styles.healthPanel}`}><PanelTitle title="Battery Health Distribution" /><DonutChart data={[{ name: 'Healthy', value: 61, color: '#20bf64' }, { name: 'Warning', value: 24, color: '#ff9d11' }, { name: 'Critical', value: 9, color: '#f04444' }, { name: 'Offline', value: 6, color: '#b7c0ca' }]} center="61%" caption="Healthy" /></section>
+      <section className={`${styles.panel} ${styles.healthPanel}`}><PanelTitle title="Battery Health Distribution" /><DonutChart data={[{ name: 'Healthy', value: 61, color: '#20bf64' }, { name: 'Warning', value: 24, color: '#ff9d11' }, { name: 'Critical', value: 9, color: '#f04444' }, { name: 'Offline', value: 6, color: '#b7c0ca' }]} center="61%" caption="Healthy" total={1200 + liveOffset} /></section>
       <section className={`${styles.panel} ${styles.tablePanel}`}><div className={styles.tableHeader}><PanelTitle title="Battery Details" /><button className={styles.filterButton} aria-label="Filter battery details" onClick={() => setFilterOpen((open) => !open)}>≡</button></div>{filterOpen && <div className={styles.filterBar}><input aria-label="Search tracker ID" placeholder="Search Tracker ID" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /><select aria-label="Filter health status" value={healthFilter} onChange={(event) => { setHealthFilter(event.target.value); setPage(1) }}><option>All</option><option>Healthy</option><option>Attention</option></select><select aria-label="Filter alarm status" value={alarmFilter} onChange={(event) => { setAlarmFilter(event.target.value); setPage(1) }}><option>All</option><option>High Temp</option><option>Low Voltage</option><option>Offline</option></select><select aria-label="Filter state of charge" value={socRange} onChange={(event) => { setSocRange(event.target.value); setPage(1) }}><option>All</option><option>High</option><option>Low</option></select></div>}<div className={styles.tableWrap}><table><thead><tr><th>Tracker ID</th><th>SoC (%)</th><th>Health Status</th><th>Alarms</th></tr></thead><tbody>{tableRows.map((detail) => <tr key={detail.id}><td><button className={styles.trackerLink} onClick={() => setSelectedTracker(detail)}>{detail.id}</button></td><td><span className={`${styles.socBadge} ${detail.soc < 15 ? styles.socDanger : detail.soc < 40 ? styles.socWarning : ''}`}>{detail.soc}%</span></td><td>{detail.health}%</td><td><span className={`${styles.alarmDot} ${styles[detail.alarmTone]}`} />{detail.alarm}</td></tr>)}{tableRows.length === 0 && <tr><td colSpan={4} className={styles.emptyRow}>No batteries match these filters.</td></tr>}</tbody></table></div><Pagination page={page} onChange={setPage} /></section>
     </section>
-    <section className={styles.bottomGrid}><section className={`${styles.panel} ${styles.histogramPanel}`}><PanelTitle title="Battery Temperature Histogram" /><div className={styles.histogram}><ResponsiveContainer width="100%" height="100%"><BarChart data={temperatureData} margin={{ top: 22, right: 10, bottom: 4, left: 0 }} barSize={23}><CartesianGrid stroke="#edf1f4" vertical={false} /><XAxis dataKey="range" tickLine={false} axisLine={false} interval={0} tick={{ fontSize: 7, fill: '#748292' }} /><YAxis tickLine={false} axisLine={false} tick={{ fontSize: 8, fill: '#748292' }} label={{ value: 'Frequency', angle: -90, position: 'insideLeft', fontSize: 8, fill: '#748292' }} /><Tooltip formatter={(value) => `${value}%`} /><Bar dataKey="percent" radius={[2, 2, 0, 0]}>{temperatureData.map((item) => <Cell key={item.range} fill={item.color} />)}<LabelList dataKey="percent" position="top" formatter={(value: number) => value ? `${value}%` : ''} style={{ fontSize: 7, fill: '#80909f' }} /></Bar></BarChart></ResponsiveContainer></div><div className={styles.axisLabel}>Temperature (°C)</div></section><section className={`${styles.panel} ${styles.distributionPanel}`}><PanelTitle title="Battery SoC Distribution" /><DonutChart data={[{ name: 'High (80-100%)', value: 52, color: '#20bf64' }, { name: 'Medium (50-79%)', value: 30, color: '#3f7ee8' }, { name: 'Low (20-49%)', value: 14, color: '#ffae13' }, { name: 'Critical (0-19%)', value: 4, color: '#f04444' }]} center="52%" caption="High SoC" /></section></section>
+    <section className={styles.bottomGrid}><section className={`${styles.panel} ${styles.histogramPanel}`}><PanelTitle title="Battery Temperature Histogram" /><div className={styles.histogram}><ResponsiveContainer width="100%" height="100%"><BarChart data={temperatureData} margin={{ top: 22, right: 10, bottom: 4, left: 0 }} barSize={23}><CartesianGrid stroke="#1f3f54" vertical={false} /><XAxis dataKey="range" tickLine={false} axisLine={false} interval={0} tick={{ fontSize: 7, fill: '#9fb2bf' }} /><YAxis tickLine={false} axisLine={false} tick={{ fontSize: 8, fill: '#9fb2bf' }} label={{ value: 'Frequency', angle: -90, position: 'insideLeft', fontSize: 8, fill: '#9fb2bf' }} /><Tooltip formatter={(value) => `${value}%`} contentStyle={{ background: '#0f2b3f', border: '1px solid #234a63', color: '#e8f1f5' }} itemStyle={{ color: '#e8f1f5' }} labelStyle={{ color: '#f4f8fb' }} /><Bar dataKey="percent" radius={[2, 2, 0, 0]}>{temperatureData.map((item) => <Cell key={item.range} fill={item.color} />)}<LabelList dataKey="percent" position="top" formatter={(value: number) => value ? `${value}%` : ''} style={{ fontSize: 7, fill: '#a9bdc9' }} /></Bar></BarChart></ResponsiveContainer></div><div className={styles.axisLabel}>Temperature (°C)</div></section><section className={`${styles.panel} ${styles.distributionPanel}`}><PanelTitle title="Battery SoC Distribution" /><DonutChart data={[{ name: 'High (80-100%)', value: 52, color: '#20bf64' }, { name: 'Medium (50-79%)', value: 30, color: '#3f7ee8' }, { name: 'Low (20-49%)', value: 14, color: '#ffae13' }, { name: 'Critical (0-19%)', value: 4, color: '#f04444' }]} center="52%" caption="High SoC" total={1200 + liveOffset} /></section></section>
     <footer>©2009-2026, Array Technologies, Inc. All Rights Reserved.</footer>
     {selectedTracker && <TelemetryModal tracker={selectedTracker} timeframe={timeframe} onClose={() => setSelectedTracker(null)} />}
   </div>
@@ -65,10 +65,107 @@ const Battery = () => {
 const SelectField = ({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: readonly string[] }) => <label className={styles.selectField}><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option key={option}>{option}</option>)}</select></label>
 const KpiCard = ({ label, value, side }: { label: string; value: string; side?: React.ReactNode }) => <div className={styles.metricCard}><span>{label}</span><div className={styles.kpiContent}><strong>{value}</strong>{side && <div className={styles.kpiSide}>{side}</div>}</div></div>
 const PanelTitle = ({ title, right }: { title: string; right?: React.ReactNode }) => <div className={styles.panelTitle}><h2>{title}</h2>{right}</div>
-const DonutChart = ({ data, center, caption }: { data: { name: string; value: number; color: string }[]; center: string; caption: string }) => <div className={styles.donut}><div className={styles.donutVisual}><ResponsiveContainer width="100%" height="100%"><PieChart margin={{ top: 20, right: 28, bottom: 4, left: 4 }}><Pie data={data} dataKey="value" nameKey="name" innerRadius="57%" outerRadius="76%" paddingAngle={2}>{data.map((item) => <Cell key={item.name} fill={item.color} />)}</Pie><Tooltip position={{ x: 8, y: 2 }} wrapperStyle={{ zIndex: 2, pointerEvents: 'none' }} contentStyle={{ border: '1px solid #d8e2ea', borderRadius: 3, padding: '4px 6px', fontSize: 9, boxShadow: '0 2px 6px rgb(15 36 56 / 12%)' }} /></PieChart></ResponsiveContainer><div className={styles.donutCenter}><strong>{center}</strong><span>{caption}</span></div></div><div className={styles.donutLegend}>{data.map((item) => <span key={item.name}><i style={{ background: item.color }} />{item.name}</span>)}</div></div>
+const DonutChart = ({ data, center, caption, total }: { data: { name: string; value: number; color: string }[]; center: string; caption: string; total: number }) => {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const hovered = hoverIndex !== null ? data[hoverIndex] : null
+  return (
+    <div className={styles.donut}>
+      <div className={styles.donutRow}>
+        <div className={styles.donutVisual}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+              <Pie data={data} dataKey="value" nameKey="name" innerRadius="57%" outerRadius="76%" paddingAngle={2} onMouseEnter={(_data, index) => setHoverIndex(index)} onMouseLeave={() => setHoverIndex(null)}>
+                {data.map((item) => <Cell key={item.name} fill={item.color} />)}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          <div className={styles.donutCenter}><strong>{center}</strong><span>{caption}</span></div>
+        </div>
+        {hovered && (
+          <div className={styles.donutHoverPanel}>
+            <strong style={{ color: hovered.color }}>{hovered.name}</strong>
+            <div className={styles.donutHoverRow}><span>Count</span><b>{Math.round((total * hovered.value) / 100).toLocaleString()}</b></div>
+            <div className={styles.donutHoverRow}><span>Percentage</span><b>{hovered.value}%</b></div>
+          </div>
+        )}
+      </div>
+      <div className={styles.donutLegend}>{data.map((item) => <span key={item.name}><i style={{ background: item.color }} />{item.name}</span>)}</div>
+    </div>
+  )
+}
 const Pagination = ({ page, onChange }: { page: number; onChange: (page: number) => void }) => <div className={styles.pagination}><button aria-label="Previous page" onClick={() => onChange(Math.max(1, page - 1))}>‹</button>{[1, 2].map((item) => <button key={item} className={page === item ? styles.pageActive : ''} onClick={() => onChange(item)}>{item}</button>)}<span>...</span>{[9, 10].map((item) => <button key={item} className={page === item ? styles.pageActive : ''} onClick={() => onChange(item)}>{item}</button>)}<button aria-label="Next page" onClick={() => onChange(Math.min(10, page + 1))}>›</button></div>
-const TelemetryModal = ({ tracker, timeframe, onClose }: { tracker: Detail; timeframe: Timeframe; onClose: () => void }) => { const data = days.map((day, index) => ({ day, soc: tracker.soc + [1, 0, -2, -1, 0, 1, 0][index], health: tracker.health + [1, 1, 0, 0, -1, -1, -1][index], temperature: 27 + index * 1.6 + (tracker.soc < 30 ? 7 : 0), voltage: 52 + [0, -1, 2, 1, 0, -2, -1][index], current: 72 + [3, 7, 13, 11, 8, 5, 3][index] })); return <div className={styles.modalBackdrop} onMouseDown={onClose}><section className={styles.telemetryModal} role="dialog" aria-modal="true" aria-labelledby="telemetry-title" onMouseDown={(event) => event.stopPropagation()}><header><div><h2 id="telemetry-title">Battery Telemetry</h2><p><strong>{tracker.id}</strong><span className={`${styles.alarmDot} ${styles[tracker.alarmTone]}`} />{tracker.alarm}</p><small>{timeframe}</small></div><button aria-label="Close telemetry" onClick={onClose}>×</button></header><div className={styles.telemetryGrid}><Telemetry title="State of Charge (SoC)" data={data} line="soc" color="#4388f5" suffix="%" /><Telemetry title="State of Health (SoH)" data={data} line="health" color="#20bf64" suffix="%" /><Telemetry title="Temperature" data={data} line="temperature" color="#f4a522" suffix="°C" /><Telemetry title="Voltage & Current" data={data} line="voltage" second="current" color="#8966e8" suffix="V" /></div></section></div> }
-const Telemetry = ({ title, data, line, second, color, suffix }: { title: string; data: Record<string, number | string>[]; line: string; second?: string; color: string; suffix: string }) => <article className={styles.telemetry}><h3>{title}</h3><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 10, right: 4, bottom: 0, left: -20 }}><CartesianGrid stroke="#edf1f4" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} /><YAxis tick={{ fontSize: 8 }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}${suffix}`} /><Tooltip /><Line type="monotone" dataKey={line} stroke={color} strokeWidth={2} dot={false} />{second && <Line type="monotone" dataKey={second} stroke="#fa5960" strokeWidth={2} dot={false} />}</LineChart></ResponsiveContainer></article>
+const TelemetryModal = ({ tracker, timeframe, onClose }: { tracker: Detail; timeframe: Timeframe; onClose: () => void }) => {
+  const [localTimeframe, setLocalTimeframe] = useState<Timeframe>(timeframe)
+  const data = days.map((day, index) => ({ day, soc: tracker.soc + [1, 0, -2, -1, 0, 1, 0][index], health: tracker.health + [1, 1, 0, 0, -1, -1, -1][index], temperature: 27 + index * 1.6 + (tracker.soc < 30 ? 7 : 0), voltage: 52 + [0, -1, 2, 1, 0, -2, -1][index], current: 72 + [3, 7, 13, 11, 8, 5, 3][index] }))
+  return (
+    <div className={styles.modalBackdrop} onMouseDown={onClose}>
+      <section className={styles.telemetryModal} role="dialog" aria-modal="true" aria-labelledby="telemetry-title" onMouseDown={(event) => event.stopPropagation()}>
+        <header>
+          <div className={styles.modalHeaderTop}>
+            <h2 id="telemetry-title">Battery Telemetry</h2>
+            <button aria-label="Close telemetry" onClick={onClose}>×</button>
+          </div>
+          <div className={styles.modalHeaderBottom}>
+            <div>
+              <p><strong>{tracker.id}</strong><span className={`${styles.alarmDot} ${styles[tracker.alarmTone]}`} />{tracker.alarm}</p>
+              <small>{localTimeframe}</small>
+            </div>
+            <label className={styles.selectField}>
+              <span>Select Timeframe</span>
+              <select value={localTimeframe} onChange={(event) => setLocalTimeframe(event.target.value as Timeframe)}>
+                {timeframes.map((option) => <option key={option}>{option}</option>)}
+              </select>
+            </label>
+          </div>
+        </header>
+        <div className={styles.telemetryGrid}>
+          <Telemetry title="State of Charge (SOC)" statLabel="SoC" data={data} line="soc" color="#4388f5" fill="#123853" suffix="%" />
+          <Telemetry title="State of Health (SOH)" statLabel="SoH" data={data} line="health" color="#20bf64" fill="#12402c" suffix="%" />
+          <Telemetry title="Temperature" statLabel="Temp" data={data} line="temperature" color="#f4a522" fill="#3d2f12" suffix="°" />
+          <Telemetry title="Voltage & Current" statLabel="Voltage" data={data} line="voltage" second="current" color="#a78bfa" suffix="V" secondSuffix="A" />
+        </div>
+      </section>
+    </div>
+  )
+}
+const Telemetry = ({ title, statLabel, data, line, second, color, fill, suffix, secondSuffix }: { title: string; statLabel: string; data: Record<string, number | string>[]; line: string; second?: string; color: string; fill?: string; suffix: string; secondSuffix?: string }) => {
+  const values = data.map((point) => Number(point[line]))
+  const max = Math.max(...values)
+  const min = Math.min(...values)
+  const avg = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+  return (
+    <article className={styles.telemetry}>
+      <div className={styles.telemetryChartHeader}>
+        <h3>{title}</h3>
+        <span className={styles.max}>Max {statLabel}: {max}{suffix}</span>
+        <span className={styles.avg}>Avg {statLabel}: {avg}{suffix}</span>
+        <span className={styles.min}>Min {statLabel}: {min}{suffix}</span>
+      </div>
+      <ResponsiveContainer width="100%" height="100%">
+        {second ? (
+          <LineChart data={data} margin={{ top: 6, right: 6, bottom: 0, left: -8 }}>
+            <CartesianGrid stroke="#1f3f54" vertical={false} />
+            <XAxis dataKey="day" tick={{ fontSize: 8, fill: '#9fb2bf' }} tickLine={false} axisLine={false} />
+            <YAxis yAxisId="voltage" tick={{ fontSize: 8, fill: '#9fb2bf' }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}${suffix}`} />
+            <YAxis yAxisId="current" orientation="right" tick={{ fontSize: 8, fill: '#9fb2bf' }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}${secondSuffix}`} />
+            <Tooltip contentStyle={{ background: '#0f2b3f', border: '1px solid #234a63', color: '#e8f1f5' }} itemStyle={{ color: '#e8f1f5' }} labelStyle={{ color: '#f4f8fb' }} />
+            <Legend verticalAlign="bottom" height={18} iconType="circle" wrapperStyle={{ fontSize: 9, color: '#c3d5e0' }} />
+            <Line yAxisId="voltage" type="monotone" dataKey={line} name="Voltage" stroke={color} strokeWidth={2} dot={false} />
+            <Line yAxisId="current" type="monotone" dataKey={second} name="Current" stroke="#fa5960" strokeWidth={2} dot={false} />
+          </LineChart>
+        ) : (
+          <AreaChart data={data} margin={{ top: 6, right: 6, bottom: 0, left: -20 }}>
+            <CartesianGrid stroke="#1f3f54" vertical={false} />
+            <XAxis dataKey="day" tick={{ fontSize: 8, fill: '#9fb2bf' }} tickLine={false} axisLine={false} />
+            <YAxis tick={{ fontSize: 8, fill: '#9fb2bf' }} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}${suffix}`} />
+            <Tooltip contentStyle={{ background: '#0f2b3f', border: '1px solid #234a63', color: '#e8f1f5' }} itemStyle={{ color: '#e8f1f5' }} labelStyle={{ color: '#f4f8fb' }} />
+            <Area type="monotone" dataKey={line} stroke={color} fill={fill} strokeWidth={2} dot={false} />
+          </AreaChart>
+        )}
+      </ResponsiveContainer>
+    </article>
+  )
+}
 export default Battery
 /* Legacy component retained by an earlier partial patch; do not compile.
 import Card from '@/components/Card/Card'

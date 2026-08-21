@@ -3,7 +3,7 @@ import styles from './Sidebar.module.css'
 
 const navItems = [
   { label: 'Dashboard', path: '/', icon: '▦' },
-  { label: 'Projects', path: '/projects', icon: '◫' },
+  { label: 'Project Details', path: '/projects', icon: '◫' },
   { label: 'Battery', path: '/battery', icon: '🔋' },
 ]
 

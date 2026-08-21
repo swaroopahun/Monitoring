@@ -6,6 +6,7 @@ import styles from './GlobalProjectsMap.module.css'
 interface GlobalProjectsMapProps {
   projects: Project[]
   onProjectSelect: (projectId: string) => void
+  height?: number
 }
 
 const MapResizeHandler = () => {
@@ -29,12 +30,12 @@ const MapResizeHandler = () => {
   return null
 }
 
-const GlobalProjectsMap = ({ projects, onProjectSelect }: GlobalProjectsMapProps) => {
+const GlobalProjectsMap = ({ projects, onProjectSelect, height }: GlobalProjectsMapProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <section className={`${styles.mapCard} ${isExpanded ? styles.expanded : ''}`} aria-label="Global Projects map">
-      <div className={styles.mapFrame}>
+      <div className={styles.mapFrame} style={{ height: isExpanded ? undefined : height }}>
         <MapContainer center={[18, 5]} zoom={2} minZoom={1} maxZoom={12} zoomControl={false} scrollWheelZoom className={styles.map}>
           <MapResizeHandler />
           <ZoomControl position="topleft" />

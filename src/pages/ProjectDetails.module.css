@@ -250,11 +250,14 @@
 .dotOffline { background: #f5a000; }
 .dotMaintenance { background: #94a3b8; }
 
+.overviewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .overviewHint {
-  padding: 16px 18px;
-  border: 1px solid #e5e9f0;
-  border-radius: 8px;
-  background: #fff;
+  margin: 0;
   color: #475467;
   font-size: 13px;
   line-height: 1.6;
@@ -264,9 +267,10 @@
   color: #111827;
 }
 
+
 .deviceFilterBar {
   display: grid;
-  grid-template-columns: minmax(200px, 1.4fr) minmax(130px, 1fr) minmax(130px, 1fr) auto;
+  grid-template-columns: minmax(200px, 2fr) minmax(150px, 1fr);
   gap: 8px;
   align-items: center;
 }
@@ -280,15 +284,6 @@
   color: #344256;
   background: #fff;
   font: inherit;
-  font-size: 12px;
-}
-
-.alertsOnly {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  color: #475467;
   font-size: 12px;
 }
 
@@ -464,4 +459,54 @@
     overflow-x: auto;
   }
 }
+
+/* Monitoring Portal visual language: match the dark navy theme used by Dashboard and Battery. Height follows content, no forced full-viewport blank space. */
+.page {
+  padding: 18px;
+  border: 1px solid #17394f;
+  border-radius: 7px;
+  background: #061d2d;
+  color: #d7e6ef;
+}
+.header { border-bottom: 1px solid #1c4057; }
+.eyebrow { color: #4ade80; }
+.header h1 { color: #f4f8fb; font-weight: 800; }
+.metaRow { color: #91a8b8; }
+.kpi { border: 1px solid #1b4057; border-radius: 7px; background: #0a2436; }
+.kpi span { color: #91a8b8; }
+.kpi strong { color: #f3f8fb; }
+.tabs { border-bottom: 1px solid #1c4057; }
+.tab { color: #8ca4b5; }
+.tab:hover { color: #d7e6ef; }
+.tabActive { color: #63b6ff; border-bottom-color: #63b6ff; }
+.widget { border: 1px solid #1b4057; border-radius: 7px; background: #0a2436; }
+.widgetHeader h2 { color: #f4f8fb; }
+.widgetHeader span { color: #8ca4b5; }
+.widgetHint { color: #c3d5e0; }
+.statList div { color: #c3d5e0; border-bottom: 1px solid #16394d; padding-bottom: 6px; }
+.statList strong { color: #f3f8fb; }
+.statFooter { border-top: 1px solid #16394d; color: #8ca4b5; }
+.statFooter strong { color: #f3f8fb; }
+.statusBar { background: #123853; }
+.statusLegend { color: #c3d5e0; }
+.statusLegend b { color: #f3f8fb; }
+.deviceFilterBar input, .deviceFilterBar select { border: 1px solid #27465a; color: #d7e6ef; background: #0c2b40; }
+.statGrid div { border-bottom: 1px solid #16394d; }
+.statGrid span { color: #8ca4b5; }
+.statGrid strong { color: #f3f8fb; }
+.tableWrap th, .tableWrap td { border-bottom: 1px solid #16394d; }
+.tableWrap thead th { color: #8ca4b5; background: #0b2639; }
+.tableWrap td { color: #c7d8e3; }
+.emptyRow { color: #7994a6; }
+.reportCard { border: 1px solid #16394d; background: #0b2639; }
+.reportCard strong { color: #f3f8fb; }
+.reportCard small { color: #8ca4b5; }
+.reportList li { border-bottom: 1px solid #16394d; }
+.reportList strong { color: #f3f8fb; }
+.reportList small { color: #8ca4b5; }
+.viewAll { color: #63b6ff; }
+.overviewHint { color: #c3d5e0; }
+.overviewHint strong { color: #f3f8fb; }
+.page :global(.recharts-cartesian-grid line) { stroke: #1f3f54; }
+.page :global(.recharts-text) { fill: #9fb2bf; }
 
