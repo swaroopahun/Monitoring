@@ -3,8 +3,7 @@ import styles from './Sidebar.module.css'
 
 const navItems = [
   { label: 'Dashboard', path: '/', icon: '▦' },
-  { label: 'Project Details', path: '/projects', icon: '◫' },
-  { label: 'Battery', path: '/battery', icon: '🔋' },
+  { label: 'Projects', path: '/projects', icon: '▣' },
 ]
 
 interface SidebarProps {
@@ -15,9 +14,9 @@ interface SidebarProps {
 const Sidebar = ({ isCollapsed, onCollapseChange }: SidebarProps) => {
 
   return (
-    <aside className={`${styles.sidebar} ${isCollapsed ? styles.sidebarCollapsed : ''}`} style={{ width: isCollapsed ? 76 : 220 }}>
+    <aside className={`${styles.sidebar} ${isCollapsed ? styles.sidebarCollapsed : ''}`} style={{ width: isCollapsed ? 76 : 218 }}>
       <div className={styles.brand}>
-        <div className={styles.brandText}>Array Monitoring</div>
+        <div className={styles.brandText}><span>▲ ARRAY</span><small>MONITORING</small></div>
         <button
           type="button"
           className={styles.collapseToggle}
@@ -29,6 +28,7 @@ const Sidebar = ({ isCollapsed, onCollapseChange }: SidebarProps) => {
         </button>
       </div>
 
+      {!isCollapsed && <div className={styles.navLabel}>NAVIGATION</div>}
       <nav className={styles.nav}>
         {navItems.map((item) => (
           <NavLink
@@ -38,17 +38,17 @@ const Sidebar = ({ isCollapsed, onCollapseChange }: SidebarProps) => {
             end={item.path === '/'}
           >
             <span className={styles.icon}>{item.icon}</span>
-            <span className={styles.label}>{item.label}</span>
+            <span className={styles.label}>{item.label.toUpperCase()}</span>
           </NavLink>
         ))}
       </nav>
 
       <div className={styles.userCard}>
-        <div className={styles.avatar}>OC</div>
+        <div className={styles.avatar}>DU</div>
         {!isCollapsed && (
           <div>
-            <div className={styles.userName}>Operations</div>
-            <div className={styles.userMeta}>Control Center</div>
+            <div className={styles.userName}>Demo User</div>
+            <div className={styles.userMeta}>Array Monitoring</div>
           </div>
         )}
       </div>

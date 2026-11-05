@@ -1,420 +1,294 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import Badge from '@/components/Badge/Badge'
-import { formatLiveTimestamp, getStatusTone, useMonitoring, type Device } from '@/services/monitoringData'
+import ProjectDeviceMap from '@/components/ProjectDeviceMap/ProjectDeviceMap'
+import { formatLiveTimestamp, getPlantStatusLabel, getStatusTone, useMonitoring, type AlarmSeverity, type Device } from '@/services/monitoringData'
 import styles from './ProjectDetails.module.css'
 
 const sections = [
-  { key: 'devices', label: 'Device Details' },
+  { key: 'devices', label: 'Devices & Alarms' },
+  { key: 'firmware', label: 'Firmware Versions' },
   { key: 'weather', label: 'Weather' },
-  { key: 'analytics', label: 'Analytics' },
   { key: 'alarms', label: 'Alarms' },
-  { key: 'firmware', label: 'Firmware Status' },
+  { key: 'battery', label: 'Battery' },
   { key: 'reports', label: 'Reports' },
 ] as const
 
 type SectionKey = (typeof sections)[number]['key']
+type BatteryView = 'overview' | 'telemetry'
+
+const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const hashSeed = (value: string) => {
   let hash = 0
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
-  }
+  for (let index = 0; index < value.length; index += 1) hash = (hash * 31 + value.charCodeAt(index)) >>> 0
   return hash
 }
 
-const roundPercent = (value: number) => Math.round(value * 100) / 100
-
-const relativeTime = (iso: string) => {
-  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000))
-  if (minutes < 2) return 'Just now'
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  return `${Math.round(hours / 24)}d ago`
-}
-
 const ProjectDetails = () => {
-  const params = useParams<{ projectId: string; section?: string }>()
+  const { projectId, section } = useParams<{ projectId: string; section?: string }>()
   const navigate = useNavigate()
-  const { projects, devices, alarms, lastUpdated } = useMonitoring()
-
-  const [deviceSearch, setDeviceSearch] = useState('')
+  const { projects, devices, alarms, batteries, lastUpdated } = useMonitoring()
+  const [mapView, setMapView] = useState(true)
   const [deviceStatus, setDeviceStatus] = useState('all')
+  const [deviceType, setDeviceType] = useState('all')
+  const [alarmType, setAlarmType] = useState('all')
+  const [batteryView, setBatteryView] = useState<BatteryView>('overview')
 
-  const project = projects.find((item) => item.id === params.projectId) ?? projects[0]
-  const activeSection: SectionKey | null = sections.find((item) => item.key === params.section)?.key ?? null
+  const project = projects.find((item) => item.id === projectId) ?? projects[0]
+  const activeSection: SectionKey = sections.find((item) => item.key === section)?.key ?? 'devices'
+  const projectDevices = devices.filter((item) => item.projectId === project.id)
+  const projectAlarms = alarms.filter((item) => item.projectId === project.id)
+  const projectBatteries = batteries.filter((item) => item.projectId === project.id)
+  const offlineDevices = Math.max(0, project.devicesTotal - project.devicesOnline)
 
-  const projectDevices = devices.filter((device) => device.projectId === project.id)
-  const projectAlarms = alarms.filter((alarm) => alarm.projectId === project.id)
+  const filteredDevices = projectDevices.filter((device) =>
+    (deviceStatus === 'all' || device.status === deviceStatus)
+    && (deviceType === 'all' || device.type === deviceType)
+    && (alarmType === 'all' || projectAlarms.some((alarm) => alarm.deviceId === device.id && alarm.severity === alarmType)),
+  )
 
   const seed = useMemo(() => hashSeed(project.id), [project.id])
+  const weather = {
+    temperature: 62 + seed % 32,
+    condition: ['Sunny', 'Clear', 'Partly Cloudy', 'Windy'][seed % 4],
+    wind: 3 + seed % 14,
+    humidity: 18 + seed % 55,
+    precipitation: seed % 30,
+    snow: seed % 3 === 0 ? 'Light snow' : 'No snow',
+  }
 
-  const weather = useMemo(() => {
-    const conditions = ['Sunny', 'Clear', 'Partly Cloudy', 'Windy']
-    const sunConditions = ['Sunny', 'Partly Cloudy', 'Clear Skies', 'Hazy Sun']
-    const snowConditions = ['No Snow', 'Light Snow', 'Snow Showers', 'Clear']
+  const averageSoc = projectBatteries.length
+    ? Math.round(projectBatteries.reduce((sum, battery) => sum + battery.soc, 0) / projectBatteries.length)
+    : null
+  const averageSoh = projectBatteries.length
+    ? Math.round(projectBatteries.reduce((sum, battery) => sum + battery.soh, 0) / projectBatteries.length)
+    : null
+
+  const telemetry = useMemo(() => weekdays.map((day, index) => {
+    const change = [1, 0, -2, -1, 0, 1, 0][index]
+    const soc = averageSoc ?? 70
+    const soh = averageSoh ?? 90
+    const avgTemp = projectBatteries.length
+      ? projectBatteries.reduce((sum, battery) => sum + battery.temperature, 0) / projectBatteries.length
+      : 25
     return {
-      temperature: 62 + (seed % 42),
-      condition: conditions[seed % conditions.length],
-      wind: 3 + (seed % 14),
-      humidity: 18 + (seed % 55),
-      pressure: 990 + (seed % 30),
-      sun: { condition: sunConditions[seed % sunConditions.length], uvIndex: 1 + (seed % 10) },
-      snow: { condition: snowConditions[(seed >> 2) % snowConditions.length], accumulation: `${seed % 6} in` },
+      day,
+      soc: Math.min(100, Math.max(0, soc + change)),
+      soh: Math.min(100, Math.max(0, soh + change * 0.2)),
+      temperature: Number((avgTemp + change * 1.4).toFixed(1)),
+      voltage: projectBatteries.length ? Math.round(projectBatteries[0].voltage + change * 2) : 52 + change,
+      current: projectBatteries.length ? Math.round(projectBatteries[0].current + change * 3) : 72 + change * 3,
     }
-  }, [seed])
+  }), [averageSoc, averageSoh, projectBatteries])
 
-  const energyTrend = useMemo(() => {
-    const scale = project.devicesTotal / 6
-    return ['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'].map((time, index) => {
-      const curve = Math.sin((index / 4) * Math.PI)
-      return {
-        time,
-        energy: Math.round(Math.max(0, curve) * scale * 4 + (seed % 20)),
-        power: Math.round(Math.max(0, curve) * scale * 1.6 + (seed % 12)),
-      }
-    })
-  }, [project.devicesTotal, seed])
+  const batteryHealth = [
+    { name: 'Healthy', value: projectBatteries.filter((battery) => battery.status === 'online').length, color: '#20c366' },
+    { name: 'Warning', value: projectBatteries.filter((battery) => battery.status === 'warning').length, color: '#ffb400' },
+    { name: 'Offline', value: projectBatteries.filter((battery) => battery.status === 'offline').length, color: '#ff353c' },
+  ].filter((item) => item.value > 0)
+  const totalBatteryCount = projectBatteries.length
+  const socBuckets = [
+    { name: 'High (80–100%)', value: projectBatteries.filter((item) => item.soc >= 80).length, color: '#20c366' },
+    { name: 'Medium (50–79%)', value: projectBatteries.filter((item) => item.soc >= 50 && item.soc < 80).length, color: '#3987f5' },
+    { name: 'Low (20–49%)', value: projectBatteries.filter((item) => item.soc >= 20 && item.soc < 50).length, color: '#ffb400' },
+    { name: 'Critical (0–19%)', value: projectBatteries.filter((item) => item.soc < 20).length, color: '#ff353c' },
+  ].filter((item) => item.value > 0)
+  const temperatureBuckets = [
+    { range: '<20°', count: projectBatteries.filter((item) => item.temperature < 20).length, color: '#b6d7ff' },
+    { range: '20–25°', count: projectBatteries.filter((item) => item.temperature >= 20 && item.temperature < 25).length, color: '#84e9ae' },
+    { range: '25–30°', count: projectBatteries.filter((item) => item.temperature >= 25 && item.temperature < 30).length, color: '#20c366' },
+    { range: '30–35°', count: projectBatteries.filter((item) => item.temperature >= 30 && item.temperature < 35).length, color: '#ffdf76' },
+    { range: '≥35°', count: projectBatteries.filter((item) => item.temperature >= 35).length, color: '#ffb400' },
+  ]
 
-  const totalEnergy = energyTrend.reduce((sum, point) => sum + point.energy, 0)
-  const peakPower = Math.max(...energyTrend.map((point) => point.power))
-
-  const alarmBuckets = {
-    critical: projectAlarms.filter((alarm) => alarm.severity === 'critical').length,
-    warning: projectAlarms.filter((alarm) => alarm.severity === 'major' || alarm.severity === 'warning').length,
-    info: projectAlarms.filter((alarm) => alarm.severity === 'info').length,
-  }
-
-  const firmwareStatuses = projectDevices.map((device) => {
-    const deviceHash = hashSeed(device.id)
-    const version = `v${2 + (deviceHash % 3)}.${deviceHash % 10}.${(deviceHash >> 4) % 10}`
-    const status = deviceHash % 10 < 7 ? 'Up to Date' : deviceHash % 10 < 9 ? 'Update Available' : 'Update Failed'
-    return { device, version, status }
-  })
-
-  const firmwareCounts = {
-    upToDate: firmwareStatuses.filter((item) => item.status === 'Up to Date').length,
-    updateAvailable: firmwareStatuses.filter((item) => item.status === 'Update Available').length,
-    updateFailed: firmwareStatuses.filter((item) => item.status === 'Update Failed').length,
-  }
-
-  const maintenanceDevices = projectDevices.filter((device) => device.status === 'warning').length
-  const offlineDevices = project.devicesTotal - project.devicesOnline
-
-  const deviceRows = useMemo(() => projectDevices.map((device) => {
-    const deviceHash = hashSeed(device.id)
+  const firmwareRows = projectDevices.map((device) => {
+    const deviceSeed = hashSeed(device.id)
     return {
       device,
-      serialNumber: `SPC${(20162700000 + (deviceHash % 900000)).toString()}`,
-      lastSeen: relativeTime(device.lastCommunication),
-      trackerAngle: (deviceHash % 61) - 30,
-      parentNcu: `NCU ${(deviceHash % 5) + 1}`,
+      software: `v${1 + (deviceSeed % 2)}.${deviceSeed % 10}.${(deviceSeed >> 3) % 10}`,
+      hardware: `v0.${(deviceSeed >> 2) % 50}`,
     }
-  }), [projectDevices])
-
-  const filteredDeviceRows = deviceRows.filter(({ device, serialNumber }) => {
-    const query = deviceSearch.trim().toLowerCase()
-    const matchesSearch = !query || device.id.toLowerCase().includes(query) || serialNumber.toLowerCase().includes(query)
-    const matchesStatus = deviceStatus === 'all' || (deviceStatus === 'alerts' ? device.activeAlarms > 0 : device.status === deviceStatus)
-    return matchesSearch && matchesStatus
   })
-
-  const reportTypes = [
-    { id: 'performance', name: 'Performance Summary', description: 'Availability, output, and efficiency for the selected period.' },
-    { id: 'alarms', name: 'Alarm Report', description: 'Full alarm history with severity and resolution time.' },
-    { id: 'devices', name: 'Device Inventory', description: 'Device list with type, status, and last communication.' },
-    { id: 'communication', name: 'Communication Health', description: 'Signal quality and connectivity trend for this site.' },
-  ]
 
   const downloadCsv = (filename: string, rows: (string | number)[][]) => {
     const escapeCell = (value: string | number) => {
       const text = String(value)
       return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
     }
-    const csv = rows.map((row) => row.map(escapeCell).join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const blob = new Blob([rows.map((row) => row.map(escapeCell).join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.download = filename
-    document.body.appendChild(link)
     link.click()
-    document.body.removeChild(link)
     URL.revokeObjectURL(url)
   }
 
-  const handleGenerateReport = (reportId: string) => {
-    const stamp = new Date().toISOString().slice(0, 10)
-    const filename = `${project.id}-${reportId}-${stamp}.csv`
-    if (reportId === 'performance') {
-      downloadCsv(filename, [
-        ['Report', 'Performance Summary'],
-        ['Project', project.name],
-        ['Reporting Period', 'Last 30 Days'],
-        ['Availability (%)', project.availability],
-        ['Total Energy (kWh)', totalEnergy],
-        ['Peak Power (kW)', peakPower],
-        ['Efficiency / Comm Quality (%)', roundPercent(project.communicationHealth)],
-        ['Active Alarms', project.activeAlarms],
-        ['Critical Alarms', project.criticalAlarms],
-      ])
-    } else if (reportId === 'alarms') {
-      downloadCsv(filename, [
-        ['Alarm ID', 'Severity', 'Device', 'Description', 'Date/Time', 'Status'],
-        ...projectAlarms.map((alarm) => [alarm.id, alarm.severity, alarm.deviceId, alarm.title, formatLiveTimestamp(alarm.startedAt), alarm.status]),
-      ])
-    } else if (reportId === 'devices') {
-      downloadCsv(filename, [
-        ['Device ID', 'Type', 'Serial Number', 'Last Seen', 'Tracker Angle', 'Parent NCU', 'Status'],
-        ...deviceRows.map(({ device, serialNumber, lastSeen, trackerAngle, parentNcu }) => [device.id, device.type, serialNumber, lastSeen, `${trackerAngle}°`, parentNcu, device.status]),
-      ])
-    } else if (reportId === 'communication') {
-      downloadCsv(filename, [
-        ['Communication Quality (%)', roundPercent(project.communicationHealth)],
-        ['Online Devices', project.devicesOnline],
-        ['Offline Devices', offlineDevices],
-        ['Last Communication', formatLiveTimestamp(project.lastUpdated)],
-        [],
-        ['Device ID', 'Communication', 'Last Seen'],
-        ...deviceRows.map(({ device, lastSeen }) => [device.id, device.communication, lastSeen]),
-      ])
-    }
-  }
+  const statusLabel = project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : getPlantStatusLabel(project.status)
+  const deviceTypeOptions = [...new Set(projectDevices.map((device) => device.type))]
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
+      <header className={styles.projectHeader}>
         <div>
-          <div className={styles.eyebrow}>LIVE • Last data received: {formatLiveTimestamp(project.lastUpdated)}</div>
-          <h1>{project.name}</h1>
-          <div className={styles.metaRow}>
-            <span>{project.location}</span>
-            <span>•</span>
-            <span>{project.devicesOnline}/{project.devicesTotal} Devices Online</span>
-            <span>•</span>
-            <span>{roundPercent(project.communicationHealth)}% Communication Health</span>
+          <div className={styles.projectTitleLine}>
+            <h1>{project.name}</h1>
+            <span className={`${styles.operationPill} ${styles[project.status]}`}><i />{statusLabel}</span>
+          </div>
+          <div className={styles.projectMeta}>
+            <span><b>⌖</b> {project.location}</span>
+            <span>Project ID: {project.id}</span>
+            <span>Customer: {project.customer}</span>
           </div>
         </div>
-        <div className={styles.headerActions}>
-          <Badge variant={getStatusTone(project.status)}>{project.status === 'healthy' ? 'Healthy' : project.status}</Badge>
+        <div className={styles.refreshInfo}>
+          <span><i />Live</span>
+          <small>Last Updated: {formatLiveTimestamp(lastUpdated)}</small>
+          <button type="button" aria-label="Refresh project details" title="Refresh data" onClick={() => window.location.reload()}>⟳</button>
         </div>
-      </div>
+      </header>
 
-      <div className={styles.kpiGrid}>
-        <div className={styles.kpi}><span>Availability</span><strong>{project.availability}%</strong></div>
-        <div className={styles.kpi}><span>Device Health</span><strong>94%</strong></div>
-        <div className={styles.kpi}><span>Online Devices</span><strong>{project.devicesOnline}</strong></div>
-        <div className={styles.kpi}><span>Offline Devices</span><strong>{offlineDevices}</strong></div>
-        <div className={styles.kpi}><span>Active Alarms</span><strong>{project.activeAlarms}</strong></div>
-        <div className={styles.kpi}><span>Critical Alarms</span><strong>{project.criticalAlarms}</strong></div>
-        <div className={styles.kpi}><span>Comm Quality</span><strong>{roundPercent(project.communicationHealth)}%</strong></div>
-        <div className={styles.kpi}><span>Last Updated</span><strong>{formatLiveTimestamp(lastUpdated)}</strong></div>
-      </div>
+      <section className={styles.projectMetrics} aria-label="Project metrics">
+        <Metric label="Total Devices" value={project.devicesTotal.toLocaleString()} detail={`${project.devicesOnline} online · ${offlineDevices} offline`} />
+        <Metric label="Installed Power" value={`${project.powerMWdc} MW`} />
+        <Metric label="Active Alarms" value={projectAlarms.filter((alarm) => alarm.status !== 'resolved').length.toString()} detail={`${project.criticalAlarms} critical`} alert={project.criticalAlarms > 0} />
+        <Metric label="Total Batteries" value={totalBatteryCount ? totalBatteryCount.toString() : 'N/A'} detail={project.supplier} />
+        <Metric label="Operational Batteries" value={projectBatteries.filter((battery) => battery.status === 'online').length.toString()} detail={`${projectBatteries.filter((battery) => battery.status !== 'online').length} need attention`} />
+        <Metric label="Avg. State of Charge" value={averageSoc === null ? 'N/A' : `${averageSoc}%`} detail={averageSoh === null ? 'No health data' : `Avg. health ${averageSoh}%`} />
+      </section>
 
       <nav className={styles.tabs} aria-label="Project modules">
-        {sections.map((section) => (
+        {sections.map((item) => (
           <button
-            key={section.key}
+            key={item.key}
             type="button"
-            className={`${styles.tab} ${activeSection === section.key ? styles.tabActive : ''}`}
-            onClick={() => navigate(`/project-details/${project.id}/${section.key}`)}
-          >
-            {section.label}
-          </button>
+            className={`${styles.tab} ${activeSection === item.key ? styles.tabActive : ''}`}
+            onClick={() => navigate(`/project-details/${project.id}/${item.key}`)}
+          >{item.label}</button>
         ))}
       </nav>
 
-      {activeSection === null && (
-        <section className={styles.overviewSection}>
-          <p className={styles.overviewHint}><strong>{project.name}</strong> is online and reporting live data. Select a module above — Device Details, Weather, Analytics, Alarms, Firmware Status, or Reports — to view its full details.</p>
+      {activeSection === 'devices' && (
+        <section className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h2>Devices &amp; Alarms</h2>
+            <div className={styles.viewSwitch}>
+              <button type="button" className={mapView ? styles.switchActive : ''} onClick={() => setMapView(true)}>Map View</button>
+              <button type="button" className={!mapView ? styles.switchActive : ''} onClick={() => setMapView(false)}>List View</button>
+            </div>
+          </div>
+          <div className={styles.filters}>
+            <label>Alarm Type<select value={alarmType} onChange={(event) => setAlarmType(event.target.value)}><option value="all">All</option><option value="critical">Critical</option><option value="major">High</option><option value="warning">Warning</option><option value="info">Info</option></select></label>
+            <label>Status<select value={deviceStatus} onChange={(event) => setDeviceStatus(event.target.value)}><option value="all">All</option><option value="online">Online</option><option value="warning">Warning</option><option value="offline">Offline</option></select></label>
+            <label>Device Type<select value={deviceType} onChange={(event) => setDeviceType(event.target.value)}><option value="all">All</option>{deviceTypeOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+          </div>
+          {mapView ? (
+            <>
+              <ProjectDeviceMap project={project} devices={filteredDevices} onDeviceSelect={(deviceId) => navigate(`/device-details/${deviceId}`)} />
+              <p className={styles.mapNote}>Click a device marker to open its details. Device map positions are illustrative around the project coordinates.</p>
+            </>
+          ) : (
+            <DeviceTable devices={filteredDevices} alarms={projectAlarms} onSelect={(deviceId) => navigate(`/device-details/${deviceId}`)} />
+          )}
+          <div className={styles.deviceCounts}>Gateways {project.concentrators} · Trackers {project.devicesTotal} · Weather Stations {project.meteoStations}</div>
         </section>
       )}
 
-      {activeSection === 'devices' && (
-        <>
-          <section className={styles.widget}>
-            <div className={styles.widgetHeader}><h2>Device Status Overview</h2></div>
-            <div className={styles.statusBar}>
-              <i style={{ width: `${(project.devicesOnline / project.devicesTotal) * 100}%`, background: '#1db969' }} />
-              <i style={{ width: `${(offlineDevices / project.devicesTotal) * 100}%`, background: '#f5a000' }} />
-            </div>
-            <div className={styles.statusLegend}>
-              <span><i className={styles.dotOnline} />Online <b>{project.devicesOnline} ({roundPercent((project.devicesOnline / project.devicesTotal) * 100)}%)</b></span>
-              <span><i className={styles.dotOffline} />Offline <b>{offlineDevices} ({roundPercent((offlineDevices / project.devicesTotal) * 100)}%)</b></span>
-              <span><i className={styles.dotMaintenance} />Maintenance <b>{maintenanceDevices} ({roundPercent((maintenanceDevices / project.devicesTotal) * 100)}%)</b></span>
-            </div>
-          </section>
-
-          <section className={styles.widget}>
-            <div className={styles.widgetHeader}><h2>Device Details</h2><span>{filteredDeviceRows.length} of {deviceRows.length} devices</span></div>
-            <div className={styles.deviceFilterBar}>
-              <input type="search" aria-label="Search device ID or serial" placeholder="Search device ID or serial..." value={deviceSearch} onChange={(event) => setDeviceSearch(event.target.value)} />
-              <select aria-label="Filter device status" value={deviceStatus} onChange={(event) => setDeviceStatus(event.target.value)}>
-                <option value="all">All Statuses</option>
-                <option value="online">Online</option>
-                <option value="offline">Offline</option>
-                <option value="warning">Warning</option>
-                <option value="alerts">Alerts</option>
-              </select>
-            </div>
-            <div className={styles.tableWrap}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Device ID</th>
-                    <th>Type</th>
-                    <th>Serial Number</th>
-                    <th>Last Seen</th>
-                    <th>Tracker Angle</th>
-                    <th>Parent NCU</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredDeviceRows.map(({ device, serialNumber, lastSeen, trackerAngle, parentNcu }) => {
-                    const statusLabel = device.status === 'online' ? 'Online' : device.status === 'warning' ? 'Warning' : 'Offline'
-                    const pillClass = device.status === 'online' ? styles.pillOnline : device.status === 'warning' ? styles.pillWarning : styles.pillOffline
-                    return (
-                      <tr key={device.id}>
-                        <td className={styles.deviceIdCell}>{device.id}</td>
-                        <td>{device.type}</td>
-                        <td>{serialNumber}</td>
-                        <td>{lastSeen}</td>
-                        <td>{trackerAngle}°</td>
-                        <td>{parentNcu}</td>
-                        <td><span className={`${styles.statusPill} ${pillClass}`}><i /> {statusLabel}</span></td>
-                      </tr>
-                    )
-                  })}
-                  {filteredDeviceRows.length === 0 && <tr><td colSpan={7} className={styles.emptyRow}>No devices match these filters.</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </>
-      )}
-
-      {activeSection === 'weather' && (
-        <section className={styles.widget}>
-          <div className={styles.widgetHeader}><h2>Weather</h2><span>{project.location.split(', ')[0]}</span></div>
-          <div className={styles.statGrid}>
-            <div><span>🌡 Temperature</span><strong>{weather.temperature}°F</strong></div>
-            <div><span>☁ Conditions</span><strong>{weather.condition}</strong></div>
-            <div><span>💨 Wind</span><strong>{weather.wind} mph</strong></div>
-            <div><span>💧 Humidity</span><strong>{weather.humidity}%</strong></div>
-            <div><span>⏱ Pressure</span><strong>{weather.pressure} hPa</strong></div>
-            <div><span>☀ Sun / Solar</span><strong>{weather.sun.condition} · UV {weather.sun.uvIndex}</strong></div>
-            <div><span>❄ Snow</span><strong>{weather.snow.condition} · {weather.snow.accumulation}</strong></div>
+      {activeSection === 'firmware' && (
+        <section className={styles.panel}>
+          <PanelHeader title="Firmware Versions" detail="Firmware versions by device type" />
+          <div className={styles.firmwareGrid}>
+            <section><h3>Software</h3>{firmwareRows.length ? firmwareRows.map(({ device, software }) => <div className={styles.versionRow} key={device.id}><span>{software}</span><small>{device.name} · {device.type}</small></div>) : <EmptyState>No device firmware is available for this project.</EmptyState>}</section>
+            <section><h3>Hardware</h3>{firmwareRows.length ? firmwareRows.map(({ device, hardware }) => <div className={styles.versionRow} key={device.id}><span>{hardware}</span><small>{device.name} · {device.type}</small></div>) : <EmptyState>No hardware versions are available.</EmptyState>}</section>
           </div>
         </section>
       )}
 
-      {activeSection === 'analytics' && (
-        <div className={styles.widgetRowSplit}>
-          <section className={styles.widget}>
-            <div className={styles.widgetHeader}><h2>System Analytics</h2><span>Today</span></div>
-            <div className={styles.chartBoxLarge}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={energyTrend} margin={{ top: 6, right: 8, bottom: 0, left: -20 }}>
-                  <CartesianGrid stroke="#1f3f54" vertical={false} />
-                  <XAxis dataKey="time" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#9fb2bf' }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#9fb2bf' }} />
-                  <Tooltip contentStyle={{ background: '#0f2b3f', border: '1px solid #234a63', color: '#e8f1f5' }} itemStyle={{ color: '#e8f1f5' }} labelStyle={{ color: '#f4f8fb' }} />
-                  <Line type="monotone" dataKey="energy" stroke="#4398f1" strokeWidth={2.5} dot={false} name="Energy (kWh)" />
-                  <Line type="monotone" dataKey="power" stroke="#ffb000" strokeWidth={2.5} dot={false} name="Power (kW)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
-          <section className={styles.widget}>
-            <div className={styles.widgetHeader}><h2>Performance Summary</h2></div>
-            <div className={styles.statList}>
-              <div><span>Total Energy</span><strong>{totalEnergy.toLocaleString()} kWh</strong></div>
-              <div><span>Peak Power</span><strong>{peakPower} kW</strong></div>
-              <div><span>Availability</span><strong>{project.availability}%</strong></div>
-              <div><span>Comm Quality</span><strong>{roundPercent(project.communicationHealth)}%</strong></div>
-            </div>
-          </section>
-        </div>
+      {activeSection === 'weather' && (
+        <section className={styles.panel}>
+          <PanelHeader title="Current Weather" detail={project.location} />
+          <div className={styles.weatherGrid}>
+            <WeatherCard icon="🌡" label="Temperature" value={`${weather.temperature}°F`} />
+            <WeatherCard icon="☀" label="Conditions" value={weather.condition} />
+            <WeatherCard icon="≋" label="Wind" value={`${weather.wind} mph`} />
+            <WeatherCard icon="♧" label="Humidity" value={`${weather.humidity}%`} />
+            <WeatherCard icon="☂" label="Precipitation Chance" value={`${weather.precipitation}%`} />
+            <WeatherCard icon="❄" label="Snow" value={weather.snow} />
+          </div>
+          <p className={styles.dataNote}>Weather values are illustrative; connect a weather provider for live site conditions.</p>
+        </section>
       )}
 
       {activeSection === 'alarms' && (
-        <div className={styles.widgetRowSplit}>
-          <section className={styles.widget}>
-            <div className={styles.widgetHeader}><h2>Alarms Summary</h2></div>
-            <div className={styles.statList}>
-              <div><span>Critical</span><strong className={styles.critical}>{alarmBuckets.critical}</strong></div>
-              <div><span>Warning</span><strong className={styles.warning}>{alarmBuckets.warning}</strong></div>
-              <div><span>Info</span><strong className={styles.info}>{alarmBuckets.info}</strong></div>
-            </div>
-          </section>
-          <section className={`${styles.widget} ${styles.widgetWide}`}>
-            <div className={styles.widgetHeader}><h2>Alarm List</h2></div>
-            <div className={styles.tableWrap}>
-              <table>
-                <thead><tr><th>Severity</th><th>Title</th><th>Device</th><th>Started</th><th>Status</th></tr></thead>
-                <tbody>
-                  {projectAlarms.map((alarm) => (
-                    <tr key={alarm.id}>
-                      <td><Badge variant={getStatusTone(alarm.severity)}>{alarm.severity}</Badge></td>
-                      <td>{alarm.title}</td>
-                      <td>{alarm.deviceId}</td>
-                      <td>{formatLiveTimestamp(alarm.startedAt)}</td>
-                      <td>{alarm.status}</td>
-                    </tr>
-                  ))}
-                  {projectAlarms.length === 0 && <tr><td colSpan={5} className={styles.emptyRow}>No alarms for this project.</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
+        <section className={styles.panel}>
+          <PanelHeader title="Active Project Alarms" detail={`${projectAlarms.filter((alarm) => alarm.status !== 'resolved').length} active`} />
+          <div className={styles.alarmSummary}>
+            <Metric label="Critical" value={alarmBuckets(projectAlarms, 'critical').toString()} alert />
+            <Metric label="High" value={alarmBuckets(projectAlarms, 'major').toString()} alert />
+            <Metric label="Warning" value={alarmBuckets(projectAlarms, 'warning').toString()} />
+            <Metric label="Info" value={alarmBuckets(projectAlarms, 'info').toString()} />
+          </div>
+          <div className={styles.tableWrap}>
+            <table>
+              <thead><tr><th>Device</th><th>Alarm Type</th><th>Severity</th><th>Started</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                {projectAlarms.map((alarm) => (
+                  <tr key={alarm.id}>
+                    <td>{alarm.deviceId}</td><td>{alarm.title}</td><td><Badge variant={getStatusTone(alarm.severity)}>{alarm.severity}</Badge></td>
+                    <td>{formatLiveTimestamp(alarm.startedAt)}</td><td>{alarm.status}</td>
+                    <td><button className={styles.textButton} type="button" onClick={() => navigate(`/device-details/${alarm.deviceId}`)}>View device →</button></td>
+                  </tr>
+                ))}
+                {projectAlarms.length === 0 && <tr><td colSpan={6}><EmptyState>No alarms reported for this project.</EmptyState></td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
-      {activeSection === 'firmware' && (
-        <div className={styles.widgetRowSplit}>
-          <section className={styles.widget}>
-            <div className={styles.widgetHeader}><h2>Firmware Status</h2></div>
-            <div className={styles.statList}>
-              <div><span>Up to Date</span><strong>{firmwareCounts.upToDate}</strong></div>
-              <div><span>Update Available</span><strong>{firmwareCounts.updateAvailable}</strong></div>
-              <div><span>Update Failed</span><strong>{firmwareCounts.updateFailed}</strong></div>
+      {activeSection === 'battery' && (
+        <section className={styles.batterySection}>
+          <nav className={styles.batteryTabs} aria-label="Battery views">
+            <button type="button" className={batteryView === 'overview' ? styles.batteryTabActive : ''} onClick={() => setBatteryView('overview')}>Battery Overview</button>
+            <button type="button" className={batteryView === 'telemetry' ? styles.batteryTabActive : ''} onClick={() => setBatteryView('telemetry')}>Battery Telemetry</button>
+          </nav>
+          {projectBatteries.length === 0 ? (
+            <section className={`${styles.panel} ${styles.emptyPanel}`}><h2>Battery Monitoring</h2><p>No battery monitoring data is associated with this project.</p></section>
+          ) : batteryView === 'overview' ? (
+            <>
+              <section className={styles.panel}>
+                <PanelHeader title="State of Charge — Last 7 Days" detail={`Max ${Math.max(...projectBatteries.map((item) => item.soc))}% · Avg ${averageSoc}% · Min ${Math.min(...projectBatteries.map((item) => item.soc))}%`} />
+                <div className={styles.largeChart}><ResponsiveContainer width="100%" height="100%"><AreaChart data={telemetry}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#718598' }} /><YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} tick={{ fontSize: 10, fill: '#718598' }} /><Tooltip /><Area type="monotone" dataKey="soc" name="Average SOC" stroke="#3987f5" fill="#d9eaff" strokeWidth={2} /></AreaChart></ResponsiveContainer></div>
+              </section>
+              <div className={styles.batteryGrid}>
+                <BatteryDonut title="Battery Health Distribution" data={batteryHealth} center={`${totalBatteryCount}`} caption="Batteries" />
+                <section className={styles.panel}><PanelHeader title="Battery Details" /><BatteryTable batteries={projectBatteries} onTelemetry={() => setBatteryView('telemetry')} /></section>
+              </div>
+              <div className={styles.batteryGrid}>
+                <BatteryDonut title="Battery SoC Distribution" data={socBuckets} center={`${averageSoc}%`} caption="Average SoC" />
+                <section className={styles.panel}><PanelHeader title="Battery Temperature Histogram" /><div className={styles.chart}><ResponsiveContainer width="100%" height="100%"><BarChart data={temperatureBuckets}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="range" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis allowDecimals={false} tick={{ fontSize: 9, fill: '#718598' }} /><Tooltip /><Bar dataKey="count" name="Batteries">{temperatureBuckets.map((item) => <Cell key={item.range} fill={item.color} />)}</Bar></BarChart></ResponsiveContainer></div></section>
+              </div>
+            </>
+          ) : (
+            <div className={styles.telemetryGrid}>
+              <TelemetryChart title="State of Charge (SOC)" data={telemetry} dataKey="soc" color="#3987f5" suffix="%" />
+              <TelemetryChart title="State of Health (SOH)" data={telemetry} dataKey="soh" color="#20c366" suffix="%" />
+              <TelemetryChart title="Temperature" data={telemetry} dataKey="temperature" color="#ffb400" suffix="°F" />
+              <section className={styles.panel}><PanelHeader title="Voltage & Current" /><div className={styles.chart}><ResponsiveContainer width="100%" height="100%"><LineChart data={telemetry}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis yAxisId="voltage" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis yAxisId="current" orientation="right" tick={{ fontSize: 9, fill: '#718598' }} /><Tooltip /><Legend /><Line yAxisId="voltage" dataKey="voltage" name="Voltage" stroke="#3987f5" dot={false} /><Line yAxisId="current" dataKey="current" name="Current" stroke="#ff353c" dot={false} /></LineChart></ResponsiveContainer></div></section>
             </div>
-          </section>
-          <section className={`${styles.widget} ${styles.widgetWide}`}>
-            <div className={styles.widgetHeader}><h2>Device Firmware</h2></div>
-            <div className={styles.tableWrap}>
-              <table>
-                <thead><tr><th>Device</th><th>Type</th><th>Version</th><th>Status</th></tr></thead>
-                <tbody>
-                  {firmwareStatuses.map(({ device, version, status }: { device: Device; version: string; status: string }) => (
-                    <tr key={device.id}>
-                      <td>{device.name}</td>
-                      <td>{device.type}</td>
-                      <td>{version}</td>
-                      <td>{status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
+          )}
+        </section>
       )}
 
       {activeSection === 'reports' && (
-        <section className={styles.widget}>
-          <div className={styles.widgetHeader}><h2>Reports</h2></div>
+        <section className={styles.panel}>
+          <PanelHeader title="Project Reports" detail="Download project data as CSV" />
           <div className={styles.reportGrid}>
-            {reportTypes.map((report) => (
-              <div key={report.id} className={styles.reportCard}>
-                <strong>{report.name}</strong>
-                <small>{report.description}</small>
-                <button type="button" className={styles.viewAll} onClick={() => handleGenerateReport(report.id)}>Generate Report →</button>
-              </div>
-            ))}
+            <ReportCard title="Device Inventory" description="Devices, status, and last communication." onClick={() => downloadCsv(`${project.id}-devices.csv`, [['Device ID', 'Type', 'Status', 'Communication'], ...projectDevices.map((device) => [device.id, device.type, device.status, device.communication])])} />
+            <ReportCard title="Alarm Summary" description="Project alarms and their current status." onClick={() => downloadCsv(`${project.id}-alarms.csv`, [['Alarm ID', 'Severity', 'Device', 'Description', 'Status'], ...projectAlarms.map((alarm) => [alarm.id, alarm.severity, alarm.deviceId, alarm.title, alarm.status])])} />
+            <ReportCard title="Battery Inventory" description="Battery charge, health, temperature, and status." onClick={() => downloadCsv(`${project.id}-batteries.csv`, [['Battery ID', 'SOC', 'SOH', 'Temperature', 'Status'], ...projectBatteries.map((battery) => [battery.id, battery.soc, battery.soh, battery.temperature, battery.status])])} />
           </div>
         </section>
       )}
@@ -422,5 +296,57 @@ const ProjectDetails = () => {
   )
 }
 
-export default ProjectDetails
+const alarmBuckets = (items: { severity: AlarmSeverity; status: string }[], severity: AlarmSeverity) => items.filter((alarm) => alarm.severity === severity && alarm.status !== 'resolved').length
 
+const Metric = ({ label, value, detail, alert = false }: { label: string; value: string; detail?: string; alert?: boolean }) => (
+  <div className={`${styles.metric} ${alert ? styles.metricAlert : ''}`}><span>{label}</span><strong>{value}</strong>{detail && <small>{detail}</small>}</div>
+)
+
+const PanelHeader = ({ title, detail }: { title: string; detail?: string }) => <div className={styles.panelHeader}><h2>{title}</h2>{detail && <span>{detail}</span>}</div>
+
+const EmptyState = ({ children }: { children: string }) => <div className={styles.emptyState}>{children}</div>
+
+const DeviceTable = ({ devices, alarms, onSelect }: { devices: Device[]; alarms: { deviceId: string; title: string; severity: AlarmSeverity }[]; onSelect: (deviceId: string) => void }) => (
+  <div className={styles.tableWrap}>
+    <table>
+      <thead><tr><th>Device ID</th><th>Type</th><th>Status</th><th>Alarms</th><th>Communication</th><th>Details</th></tr></thead>
+      <tbody>
+        {devices.map((device) => {
+          const deviceAlarms = alarms.filter((alarm) => alarm.deviceId === device.id)
+          return <tr key={device.id}><td><button className={styles.textButton} type="button" onClick={() => onSelect(device.id)}>{device.id}</button></td><td>{device.type}</td><td><Badge variant={getStatusTone(device.status)}>{device.status}</Badge></td><td>{deviceAlarms.length ? deviceAlarms.map((alarm) => <span className={styles.alarmTag} key={`${alarm.deviceId}-${alarm.title}`} title={alarm.title}>{alarm.severity}</span>) : '—'}</td><td>{device.communication}</td><td><button className={styles.textButton} type="button" onClick={() => onSelect(device.id)}>Open →</button></td></tr>
+        })}
+        {devices.length === 0 && <tr><td colSpan={6}><EmptyState>No devices match these filters.</EmptyState></td></tr>}
+      </tbody>
+    </table>
+  </div>
+)
+
+const WeatherCard = ({ icon, label, value }: { icon: string; label: string; value: string }) => <div className={styles.weatherCard}><span>{icon} {label}</span><strong>{value}</strong></div>
+
+const BatteryDonut = ({ title, data, center, caption }: { title: string; data: { name: string; value: number; color: string }[]; center: string; caption: string }) => (
+  <section className={styles.panel}>
+    <PanelHeader title={title} />
+    {data.length ? <>
+      <div className={styles.donutArea}>
+        <div className={styles.donutVisual}><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data} dataKey="value" nameKey="name" innerRadius="60%" outerRadius="82%" paddingAngle={2}>{data.map((item) => <Cell key={item.name} fill={item.color} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer><div className={styles.donutCenter}><strong>{center}</strong><small>{caption}</small></div></div>
+      </div>
+      <div className={styles.donutLegend}>{data.map((item) => <span key={item.name}><i style={{ background: item.color }} />{item.name} ({item.value})</span>)}</div>
+    </> : <EmptyState>No battery data is available.</EmptyState>}
+  </section>
+)
+
+const BatteryTable = ({ batteries, onTelemetry }: { batteries: ReturnType<typeof useMonitoring>['batteries']; onTelemetry: () => void }) => (
+  <div className={styles.tableWrap}>
+    <table><thead><tr><th>Tracker ID</th><th>SoC (%)</th><th>Health Status</th><th>Alarms</th></tr></thead>
+      <tbody>{batteries.map((battery) => <tr key={battery.id}><td><button type="button" className={styles.textButton} onClick={onTelemetry}>{battery.id}</button></td><td>{battery.soc}%</td><td>{battery.soh}%</td><td><Badge variant={getStatusTone(battery.status)}>{battery.status}</Badge></td></tr>)}</tbody>
+    </table>
+  </div>
+)
+
+const TelemetryChart = ({ title, data, dataKey, color, suffix }: { title: string; data: { day: string; soc: number; soh: number; temperature: number }[]; dataKey: 'soc' | 'soh' | 'temperature'; color: string; suffix: string }) => (
+  <section className={styles.panel}><PanelHeader title={title} /><div className={styles.chart}><ResponsiveContainer width="100%" height="100%"><AreaChart data={data}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis tickFormatter={(value) => `${value}${suffix}`} tick={{ fontSize: 9, fill: '#718598' }} /><Tooltip formatter={(value) => `${value}${suffix}`} /><Area type="monotone" dataKey={dataKey} stroke={color} fill={`${color}33`} strokeWidth={2} /></AreaChart></ResponsiveContainer></div></section>
+)
+
+const ReportCard = ({ title, description, onClick }: { title: string; description: string; onClick: () => void }) => <article className={styles.reportCard}><strong>{title}</strong><p>{description}</p><button className={styles.textButton} type="button" onClick={onClick}>Download CSV →</button></article>
+
+export default ProjectDetails

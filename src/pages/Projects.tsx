@@ -9,9 +9,6 @@ const commStatusOptions = ['Strong', 'Stable', 'Weak', 'Lost'] as const
 
 const uniqueSorted = (values: string[]) => Array.from(new Set(values)).sort((a, b) => a.localeCompare(b))
 
-const formatCommTimestamp = (isoDate: string) =>
-  new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(isoDate))
-
 const Projects = () => {
   const navigate = useNavigate()
   const { projects } = useMonitoring()
@@ -20,16 +17,15 @@ const Projects = () => {
   const [region, setRegion] = useState('all')
   const [plantStatus, setPlantStatus] = useState('all')
   const [commStatus, setCommStatus] = useState('all')
-  const [supplier, setSupplier] = useState('all')
-  const [blinding, setBlinding] = useState('all')
+  const [family, setFamily] = useState('all')
+  const [binding, setBinding] = useState('all')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
 
   const customers = useMemo(() => uniqueSorted(projects.map((project) => project.customer)), [projects])
   const countries = useMemo(() => uniqueSorted(projects.map((project) => project.country)), [projects])
   const regions = useMemo(() => uniqueSorted(projects.map((project) => project.region)), [projects])
-  const suppliers = useMemo(() => uniqueSorted(projects.map((project) => project.supplier)), [projects])
-  const blindingOptions = useMemo(() => Array.from(new Set(projects.map((project) => project.blindingPercent))).sort((a, b) => b - a), [projects])
+  const families = useMemo(() => uniqueSorted(projects.map((project) => project.supplier)), [projects])
 
   const visibleProjects = useMemo(() => projects.filter((project) => {
     const query = search.trim().toLowerCase()
@@ -39,10 +35,10 @@ const Projects = () => {
     const matchesRegion = region === 'all' || project.region === region
     const matchesPlantStatus = plantStatus === 'all' || project.status === plantStatus
     const matchesCommStatus = commStatus === 'all' || getCommStatus(project.communicationHealth) === commStatus
-    const matchesSupplier = supplier === 'all' || project.supplier === supplier
-    const matchesBlinding = blinding === 'all' || String(project.blindingPercent) === blinding
-    return matchesSearch && matchesCustomer && matchesCountry && matchesRegion && matchesPlantStatus && matchesCommStatus && matchesSupplier && matchesBlinding
-  }), [projects, search, customer, country, region, plantStatus, commStatus, supplier, blinding])
+    const matchesFamily = family === 'all' || project.supplier === family
+    const matchesBinding = binding === 'all' || (binding === 'below' ? project.blindingPercent < 50 : project.blindingPercent >= 50)
+    return matchesSearch && matchesCustomer && matchesCountry && matchesRegion && matchesPlantStatus && matchesCommStatus && matchesFamily && matchesBinding
+  }), [projects, search, customer, country, region, plantStatus, commStatus, family, binding])
 
   const totalPages = Math.max(1, Math.ceil(visibleProjects.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -59,7 +55,7 @@ const Projects = () => {
     <div className={styles.projects}>
       <div className={styles.header}>
         <div>
-          <h1>Project Details</h1>
+          <h1>Projects</h1>
           <p>{projects.length} Total • {projects.filter((project) => project.status === 'healthy').length} Online</p>
         </div>
       </div>
@@ -70,8 +66,8 @@ const Projects = () => {
         <label><span>Region</span><select value={region} onChange={updateFilter(setRegion)}><option value="all">All</option>{regions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label><span>Plant Status</span><select value={plantStatus} onChange={updateFilter(setPlantStatus)}><option value="all">All</option><option value="healthy">{getPlantStatusLabel('healthy')}</option><option value="warning">{getPlantStatusLabel('warning')}</option><option value="critical">{getPlantStatusLabel('critical')}</option><option value="offline">{getPlantStatusLabel('offline')}</option></select></label>
         <label><span>Comm Status</span><select value={commStatus} onChange={updateFilter(setCommStatus)}><option value="all">All</option>{commStatusOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-        <label><span>Supplier</span><select value={supplier} onChange={updateFilter(setSupplier)}><option value="all">All</option>{suppliers.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-        <label><span>Blinding</span><select value={blinding} onChange={updateFilter(setBlinding)}><option value="all">All</option>{blindingOptions.map((value) => <option key={value} value={value}>{value}%</option>)}</select></label>
+        <label><span>Project Family</span><select value={family} onChange={updateFilter(setFamily)}><option value="all">All</option>{families.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+        <label><span>Binding</span><select value={binding} onChange={updateFilter(setBinding)}><option value="all">All</option><option value="below">Below 50%</option><option value="above">50% and above</option></select></label>
         <label><span>Plant Name / ID</span><input type="search" aria-label="Search by plant name or ID" placeholder="Search..." value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
       </div>
 
@@ -84,35 +80,35 @@ const Projects = () => {
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Plant Name</th>
-              <th>Communication (UTC)</th>
-              <th>Concent.</th>
-              <th>Contr.</th>
-              <th>Meteo</th>
-              <th>Power (MWdc)</th>
+              <th>Project ID · Alarm</th>
+              <th>Project Name</th>
+              <th>Family</th>
               <th>Customer</th>
               <th>Country</th>
               <th>Region</th>
-              <th>Blinding %</th>
-              <th>Plant Status</th>
+              <th>Gateways</th>
+              <th>Devices · Alarm types</th>
+              <th>Weather Stations</th>
+              <th>Power (MWdc)</th>
+              <th>Binding %</th>
+              <th>Project Status</th>
             </tr>
           </thead>
           <tbody>
             {pageRows.map((project) => (
               <tr key={project.id} onClick={() => openProject(project)}>
-                <td>{project.id}</td>
-                <td><strong>{project.name}</strong></td>
-                <td>{formatCommTimestamp(project.lastUpdated)}</td>
-                <td>{project.concentrators}</td>
-                <td>{project.controllers}</td>
-                <td>{project.meteoStations}</td>
-                <td>{project.powerMWdc}</td>
+                <td><span className={`${styles.alarmDot} ${project.activeAlarms > 3 ? styles.alarmHigh : ''}`} title={`${project.activeAlarms} active alarms`} /><button className={styles.projectLink} type="button" onClick={(event) => { event.stopPropagation(); openProject(project) }}>{project.id}</button></td>
+                <td><button className={styles.projectLink} type="button" onClick={(event) => { event.stopPropagation(); openProject(project) }}><strong>{project.name}</strong></button></td>
+                <td>{project.supplier}</td>
                 <td>{project.customer}</td>
                 <td>{project.country}</td>
                 <td>{project.region}</td>
+                <td>{project.concentrators}</td>
+                <td>{project.devicesTotal}<div className={styles.alarmTags}>{project.activeAlarms > 0 && <span title="Active device alarms">{project.activeAlarms} active</span>}{project.criticalAlarms > 0 && <span className={styles.criticalTag} title="Critical alarms">{project.criticalAlarms} critical</span>}</div></td>
+                <td>{project.meteoStations}</td>
+                <td>{project.powerMWdc}</td>
                 <td>{project.blindingPercent}%</td>
-                <td><Badge variant={getStatusTone(project.status)}>{getPlantStatusLabel(project.status)}</Badge></td>
+                <td><Badge variant={getStatusTone(project.status)}>{project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : getPlantStatusLabel(project.status)}</Badge></td>
               </tr>
             ))}
             {pageRows.length === 0 && <tr><td colSpan={12} className={styles.empty}>No projects match the current filters.</td></tr>}

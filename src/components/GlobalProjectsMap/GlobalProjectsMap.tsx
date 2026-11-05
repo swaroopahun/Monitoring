@@ -39,17 +39,27 @@ const GlobalProjectsMap = ({ projects, onProjectSelect, height }: GlobalProjects
         <MapContainer center={[18, 5]} zoom={2} minZoom={1} maxZoom={12} zoomControl={false} scrollWheelZoom className={styles.map}>
           <MapResizeHandler />
           <ZoomControl position="topleft" />
-          <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <TileLayer
+            attribution="Tiles &copy; Esri, Maxar, Earthstar Geographics"
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            maxZoom={19}
+          />
           {projects.map((project) => {
-            const isOnline = project.status === 'healthy'
-            const statusLabel = isOnline ? 'Online' : 'Offline'
+            const markerColor = project.status === 'healthy'
+              ? '#20c366'
+              : project.status === 'warning'
+                ? '#ffb400'
+                : project.status === 'critical'
+                  ? '#ff353c'
+                  : '#718598'
+            const statusLabel = project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : project.status
 
             return (
               <CircleMarker
                 key={project.id}
                 center={[project.lat, project.lng]}
                 radius={isExpanded ? 11 : 9}
-                pathOptions={{ color: '#ffffff', weight: 2, fillColor: isOnline ? '#1db969' : '#f5a000', fillOpacity: 1 }}
+                pathOptions={{ color: '#ffffff', weight: 2, fillColor: markerColor, fillOpacity: 1 }}
                 eventHandlers={{ click: () => onProjectSelect(project.id) }}
               >
                 <LeafletTooltip direction="top" offset={[0, -10]}>
@@ -62,7 +72,12 @@ const GlobalProjectsMap = ({ projects, onProjectSelect, height }: GlobalProjects
         <button type="button" className={styles.expandButton} aria-label={isExpanded ? 'Restore map size' : 'Expand map'} title={isExpanded ? 'Restore map size' : 'Expand map'} onClick={() => setIsExpanded((expanded) => !expanded)}>
           {isExpanded ? '×' : '↗'}
         </button>
-        <div className={styles.legend}><span><i className={styles.onlineDot} />Online</span><span><i className={styles.offlineDot} />Offline</span></div>
+        <div className={styles.legend} aria-label="Project status legend">
+          <span><i className={styles.onlineDot} />In Operation</span>
+          <span><i className={styles.warningDot} />Issues</span>
+          <span><i className={styles.criticalDot} />Critical</span>
+          <span><i className={styles.offlineDot} />Offline</span>
+        </div>
       </div>
     </section>
   )

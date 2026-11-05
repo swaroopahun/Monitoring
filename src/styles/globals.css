@@ -16,13 +16,13 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);
   color: var(--color-gray-dark);
-  background: linear-gradient(180deg, #e7edf3 0%, #dfe8f0 100%);
+  background: #eff6fc;
 }
 
 .leaflet-container {
   height: 100%;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 4px;
   background: #dfeaf5;
 }
 

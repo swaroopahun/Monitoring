@@ -8,7 +8,7 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const sidebarWidth = isSidebarCollapsed ? 76 : 220
+  const sidebarWidth = isSidebarCollapsed ? 76 : 218
 
   return (
     <div className={`${styles.layoutShell} ${isSidebarCollapsed ? styles.sidebarCollapsed : ''}`}>

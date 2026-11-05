@@ -101,14 +101,18 @@
 }
 
 .onlineDot,
+.warningDot,
+.criticalDot,
 .offlineDot {
   width: 9px;
   height: 9px;
   border-radius: 50%;
 }
 
-.onlineDot { background: #1db969; }
-.offlineDot { background: #f5a000; }
+.onlineDot { background: #20c366; }
+.warningDot { background: #ffb400; }
+.criticalDot { background: #ff353c; }
+.offlineDot { background: #718598; }
 
 .expanded {
   position: fixed;

@@ -2,7 +2,7 @@
   --sidebar-width: 220px;
   display: flex;
   min-height: 100vh;
-  background: #edf2f7;
+  background: #f1f7fc;
 }
 
 .sidebarCollapsed {
