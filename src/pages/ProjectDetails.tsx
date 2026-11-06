@@ -7,12 +7,11 @@ import { formatLiveTimestamp, getPlantStatusLabel, getStatusTone, useMonitoring,
 import styles from './ProjectDetails.module.css'
 
 const sections = [
-  { key: 'devices', label: 'Devices & Alarms' },
+  { key: 'devices', label: 'Devices' },
   { key: 'firmware', label: 'Firmware Versions' },
   { key: 'weather', label: 'Weather' },
   { key: 'alarms', label: 'Alarms' },
   { key: 'battery', label: 'Battery' },
-  { key: 'reports', label: 'Reports' },
 ] as const
 
 type SectionKey = (typeof sections)[number]['key']

@@ -5,18 +5,18 @@ import { getCommStatus, getPlantStatusLabel, getStatusTone, useMonitoring, type 
 import styles from './Projects.module.css'
 
 const PAGE_SIZE = 10
-const commStatusOptions = ['Strong', 'Stable', 'Weak', 'Lost'] as const
+const alarmTypeOptions = ['critical', 'warning', 'info'] as const
 
 const uniqueSorted = (values: string[]) => Array.from(new Set(values)).sort((a, b) => a.localeCompare(b))
 
 const Projects = () => {
   const navigate = useNavigate()
   const { projects } = useMonitoring()
+  const [alarmType, setAlarmType] = useState('all')
   const [customer, setCustomer] = useState('all')
   const [country, setCountry] = useState('all')
   const [region, setRegion] = useState('all')
-  const [plantStatus, setPlantStatus] = useState('all')
-  const [commStatus, setCommStatus] = useState('all')
+  const [projectStatus, setProjectStatus] = useState('all')
   const [family, setFamily] = useState('all')
   const [binding, setBinding] = useState('all')
   const [search, setSearch] = useState('')
@@ -30,15 +30,19 @@ const Projects = () => {
   const visibleProjects = useMemo(() => projects.filter((project) => {
     const query = search.trim().toLowerCase()
     const matchesSearch = !query || project.name.toLowerCase().includes(query) || project.id.toLowerCase().includes(query)
+    const matchesAlarmType = alarmType === 'all' || (
+      alarmType === 'critical' ? project.criticalAlarms > 0 || project.status === 'critical'
+        : alarmType === 'warning' ? project.status === 'warning' || project.activeAlarms > 0
+        : project.activeAlarms > 0
+    )
     const matchesCustomer = customer === 'all' || project.customer === customer
     const matchesCountry = country === 'all' || project.country === country
     const matchesRegion = region === 'all' || project.region === region
-    const matchesPlantStatus = plantStatus === 'all' || project.status === plantStatus
-    const matchesCommStatus = commStatus === 'all' || getCommStatus(project.communicationHealth) === commStatus
+    const matchesProjectStatus = projectStatus === 'all' || project.status === projectStatus
     const matchesFamily = family === 'all' || project.supplier === family
     const matchesBinding = binding === 'all' || (binding === 'below' ? project.blindingPercent < 50 : project.blindingPercent >= 50)
-    return matchesSearch && matchesCustomer && matchesCountry && matchesRegion && matchesPlantStatus && matchesCommStatus && matchesFamily && matchesBinding
-  }), [projects, search, customer, country, region, plantStatus, commStatus, family, binding])
+    return matchesSearch && matchesAlarmType && matchesCustomer && matchesCountry && matchesRegion && matchesProjectStatus && matchesFamily && matchesBinding
+  }), [projects, search, alarmType, customer, country, region, projectStatus, family, binding])
 
   const totalPages = Math.max(1, Math.ceil(visibleProjects.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -61,14 +65,14 @@ const Projects = () => {
       </div>
 
       <div className={styles.filters}>
+        <label><span>Alarm Type</span><select value={alarmType} onChange={updateFilter(setAlarmType)}><option value="all">All</option>{alarmTypeOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label><span>Customer</span><select value={customer} onChange={updateFilter(setCustomer)}><option value="all">All</option>{customers.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label><span>Country</span><select value={country} onChange={updateFilter(setCountry)}><option value="all">All</option>{countries.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label><span>Region</span><select value={region} onChange={updateFilter(setRegion)}><option value="all">All</option>{regions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-        <label><span>Plant Status</span><select value={plantStatus} onChange={updateFilter(setPlantStatus)}><option value="all">All</option><option value="healthy">{getPlantStatusLabel('healthy')}</option><option value="warning">{getPlantStatusLabel('warning')}</option><option value="critical">{getPlantStatusLabel('critical')}</option><option value="offline">{getPlantStatusLabel('offline')}</option></select></label>
-        <label><span>Comm Status</span><select value={commStatus} onChange={updateFilter(setCommStatus)}><option value="all">All</option>{commStatusOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-        <label><span>Project Family</span><select value={family} onChange={updateFilter(setFamily)}><option value="all">All</option>{families.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+        <label><span>Project Status</span><select value={projectStatus} onChange={updateFilter(setProjectStatus)}><option value="all">All</option><option value="healthy">{getPlantStatusLabel('healthy')}</option><option value="warning">{getPlantStatusLabel('warning')}</option><option value="critical">{getPlantStatusLabel('critical')}</option><option value="offline">{getPlantStatusLabel('offline')}</option></select></label>
+        <label><span>Supplier</span><select value={family} onChange={updateFilter(setFamily)}><option value="all">All</option>{families.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label><span>Binding</span><select value={binding} onChange={updateFilter(setBinding)}><option value="all">All</option><option value="below">Below 50%</option><option value="above">50% and above</option></select></label>
-        <label><span>Plant Name / ID</span><input type="search" aria-label="Search by plant name or ID" placeholder="Search..." value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
+        <label><span>Project Name / ID</span><input type="search" aria-label="Search by project name or ID" placeholder="Search..." value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
       </div>
 
       <h2 className={styles.sectionTitle}>Information about the plants</h2>
@@ -80,14 +84,15 @@ const Projects = () => {
         <table>
           <thead>
             <tr>
-              <th>Project ID · Alarm</th>
+              <th>Project ID</th>
               <th>Project Name</th>
-              <th>Family</th>
-              <th>Customer</th>
+              <th>Tracker Family</th>
+              <th>Customer Name</th>
               <th>Country</th>
               <th>Region</th>
-              <th>Gateways</th>
-              <th>Devices · Alarm types</th>
+              <th>Gateway</th>
+              <th>Tracker</th>
+              <th>Repeater</th>
               <th>Weather Stations</th>
               <th>Power (MWdc)</th>
               <th>Binding %</th>
