@@ -113,6 +113,7 @@ const ProjectDetails = () => {
 
   const statusLabel = project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : getPlantStatusLabel(project.status)
   const deviceTypeOptions = [...new Set(projectDevices.map((device) => device.type))]
+  const isSkylinkProject = project.supplier === 'Skylink'
 
   return (
     <div className={styles.page}>
@@ -137,11 +138,11 @@ const ProjectDetails = () => {
 
       <section className={styles.projectMetrics} aria-label="Project metrics">
         <Metric label="Total Devices" value={project.devicesTotal.toLocaleString()} detail={`${project.devicesOnline} online · ${offlineDevices} offline`} />
-        <Metric label="Installed Power" value={`${project.powerMWdc} MW`} />
+        <Metric label="Installed Power" value={isSkylinkProject ? 'N/A' : `${project.powerMWdc} MW`} />
         <Metric label="Active Alarms" value={projectAlarms.filter((alarm) => alarm.status !== 'resolved').length.toString()} detail={`${project.criticalAlarms} critical`} alert={project.criticalAlarms > 0} />
-        <Metric label="Total Batteries" value={totalBatteryCount ? totalBatteryCount.toString() : 'N/A'} detail={project.supplier} />
-        <Metric label="Operational Batteries" value={projectBatteries.filter((battery) => battery.status === 'online').length.toString()} detail={`${projectBatteries.filter((battery) => battery.status !== 'online').length} need attention`} />
-        <Metric label="Avg. State of Charge" value={averageSoc === null ? 'N/A' : `${averageSoc}%`} detail={averageSoh === null ? 'No health data' : `Avg. health ${averageSoh}%`} />
+        <Metric label="Total Batteries" value={isSkylinkProject ? 'N/A' : (totalBatteryCount ? totalBatteryCount.toString() : 'N/A')} detail={project.supplier} />
+        <Metric label="Operational Batteries" value={isSkylinkProject ? 'N/A' : projectBatteries.filter((battery) => battery.status === 'online').length.toString()} detail={isSkylinkProject ? 'Battery data unavailable' : `${projectBatteries.filter((battery) => battery.status !== 'online').length} need attention`} />
+        <Metric label="Avg. State of Charge" value={isSkylinkProject ? 'N/A' : (averageSoc === null ? 'N/A' : `${averageSoc}%`)} detail={isSkylinkProject ? 'Battery data unavailable' : (averageSoh === null ? 'No health data' : `Avg. health ${averageSoh}%`)} />
       </section>
 
       <nav className={styles.tabs} aria-label="Project modules">
@@ -235,13 +236,15 @@ const ProjectDetails = () => {
 
       {activeSection === 'battery' && (
         <section className={styles.batterySection}>
-          <nav className={styles.batteryTabs} aria-label="Battery views">
-            <button type="button" className={batteryView === 'overview' ? styles.batteryTabActive : ''} onClick={() => setBatteryView('overview')}>Battery Overview</button>
-            <button type="button" className={batteryView === 'telemetry' ? styles.batteryTabActive : ''} onClick={() => setBatteryView('telemetry')}>Battery Telemetry</button>
-          </nav>
-          {projectBatteries.length === 0 ? (
-            <section className={`${styles.panel} ${styles.emptyPanel}`}><h2>Battery Monitoring</h2><p>No battery monitoring data is associated with this project.</p></section>
-          ) : batteryView === 'overview' ? (
+          {!isSkylinkProject ? (
+            <>
+              <nav className={styles.batteryTabs} aria-label="Battery views">
+                <button type="button" className={batteryView === 'overview' ? styles.batteryTabActive : ''} onClick={() => setBatteryView('overview')}>Battery Overview</button>
+                <button type="button" className={batteryView === 'telemetry' ? styles.batteryTabActive : ''} onClick={() => setBatteryView('telemetry')}>Battery Telemetry</button>
+              </nav>
+              {projectBatteries.length === 0 ? (
+                <section className={`${styles.panel} ${styles.emptyPanel}`}><h2>Battery Monitoring</h2><p>No battery monitoring data is associated with this project.</p></section>
+              ) : batteryView === 'overview' ? (
             <>
               <section className={styles.panel}>
                 <PanelHeader title="State of Charge — Last 7 Days" detail={`Max ${Math.max(...projectBatteries.map((item) => item.soc))}% · Avg ${averageSoc}% · Min ${Math.min(...projectBatteries.map((item) => item.soc))}%`} />
@@ -256,13 +259,17 @@ const ProjectDetails = () => {
                 <section className={styles.panel}><PanelHeader title="Battery Temperature Histogram" /><div className={styles.chart}><ResponsiveContainer width="100%" height="100%"><BarChart data={temperatureBuckets}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="range" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis allowDecimals={false} tick={{ fontSize: 9, fill: '#718598' }} /><Tooltip /><Bar dataKey="count" name="Batteries">{temperatureBuckets.map((item) => <Cell key={item.range} fill={item.color} />)}</Bar></BarChart></ResponsiveContainer></div></section>
               </div>
             </>
+              ) : (
+                <div className={styles.telemetryGrid}>
+                  <TelemetryChart title="State of Charge (SOC)" data={telemetry} dataKey="soc" color="#3987f5" suffix="%" />
+                  <TelemetryChart title="State of Health (SOH)" data={telemetry} dataKey="soh" color="#20c366" suffix="%" />
+                  <TelemetryChart title="Temperature" data={telemetry} dataKey="temperature" color="#ffb400" suffix="°F" />
+                  <section className={styles.panel}><PanelHeader title="Voltage & Current" /><div className={styles.chart}><ResponsiveContainer width="100%" height="100%"><LineChart data={telemetry}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis yAxisId="voltage" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis yAxisId="current" orientation="right" tick={{ fontSize: 9, fill: '#718598' }} /><Tooltip /><Legend /><Line yAxisId="voltage" dataKey="voltage" name="Voltage" stroke="#3987f5" dot={false} /><Line yAxisId="current" dataKey="current" name="Current" stroke="#ff353c" dot={false} /></LineChart></ResponsiveContainer></div></section>
+                </div>
+              )}
+            </>
           ) : (
-            <div className={styles.telemetryGrid}>
-              <TelemetryChart title="State of Charge (SOC)" data={telemetry} dataKey="soc" color="#3987f5" suffix="%" />
-              <TelemetryChart title="State of Health (SOH)" data={telemetry} dataKey="soh" color="#20c366" suffix="%" />
-              <TelemetryChart title="Temperature" data={telemetry} dataKey="temperature" color="#ffb400" suffix="°F" />
-              <section className={styles.panel}><PanelHeader title="Voltage & Current" /><div className={styles.chart}><ResponsiveContainer width="100%" height="100%"><LineChart data={telemetry}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis yAxisId="voltage" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis yAxisId="current" orientation="right" tick={{ fontSize: 9, fill: '#718598' }} /><Tooltip /><Legend /><Line yAxisId="voltage" dataKey="voltage" name="Voltage" stroke="#3987f5" dot={false} /><Line yAxisId="current" dataKey="current" name="Current" stroke="#ff353c" dot={false} /></LineChart></ResponsiveContainer></div></section>
-            </div>
+            <section className={`${styles.panel} ${styles.emptyPanel}`}><h2>Battery Monitoring</h2><p>N/A — Battery data is not available for Skylink projects.</p></section>
           )}
         </section>
       )}

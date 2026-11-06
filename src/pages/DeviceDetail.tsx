@@ -20,6 +20,7 @@ const DeviceDetail = () => {
   const deviceAlarms = alarms.filter((item) => item.deviceId === device.id)
   const currentAlarm = deviceAlarms.find((item) => item.status !== 'resolved') ?? deviceAlarms[0]
   const isOffline = device.status === 'offline' || device.communication === 'Lost'
+  const isSkylinkProject = project?.supplier === 'Skylink'
   const statusText = isOffline ? 'Disabled' : device.status === 'warning' ? 'Warning' : 'Enabled'
   const communicationText = device.communication === 'Lost' ? 'No Communication' : `${device.communication} Communication`
   const bindingPercent = project?.blindingPercent ?? 0
@@ -105,7 +106,7 @@ const DeviceDetail = () => {
         <article className={`${styles.panel} ${styles.moreInfo}`}>
           <h2>More Information</h2>
           <div className={styles.infoGrid}>
-            <Reading label="Type" value={device.type} />
+            {!isSkylinkProject && <Reading label="Type" value={device.type} />}
             <Reading label="Communication" value="Zigbee" />
             <Reading label="Supplier" value={project?.supplier ?? '—'} />
           </div>
@@ -162,10 +163,10 @@ const DeviceDetail = () => {
           <article className={`${styles.panel} ${styles.powerPanel}`}>
             <h2>Power</h2>
             <div className={styles.powerGrid}>
-              <PowerReading icon="▣" label="Charge" value={`${charge}%`} />
-              <PowerReading icon="▱" label="Capacity" value={`${capacity} Ah`} />
-              <PowerReading icon="▲" label="Voltage" value={`${battery?.voltage ?? device.voltage} V`} />
-              <PowerReading icon="◉" label="Current" value={`${battery?.current ?? device.current} mA`} />
+              <PowerReading icon="▣" label="Charge" value={isSkylinkProject ? 'N/A' : `${charge}%`} />
+              <PowerReading icon="▱" label="Capacity" value={isSkylinkProject ? 'N/A' : `${capacity} Ah`} />
+              <PowerReading icon="▲" label="Voltage" value={isSkylinkProject ? 'N/A' : `${battery?.voltage ?? device.voltage} V`} />
+              <PowerReading icon="◉" label="Current" value={isSkylinkProject ? 'N/A' : `${battery?.current ?? device.current} mA`} />
             </div>
           </article>
         </div>

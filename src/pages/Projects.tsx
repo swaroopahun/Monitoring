@@ -53,6 +53,7 @@ const Projects = () => {
   }
 
   const openProject = (project: Project) => navigate(`/project-details/${project.id}`)
+  const isSkylinkProject = (project: Project) => project.supplier === 'Skylink'
 
   return (
     <div className={styles.projects}>
@@ -110,7 +111,7 @@ const Projects = () => {
                 <td>{project.concentrators}</td>
                 <td>{project.devicesTotal}<div className={styles.alarmTags}>{project.activeAlarms > 0 && <span title="Active device alarms">{project.activeAlarms} active</span>}{project.criticalAlarms > 0 && <span className={styles.criticalTag} title="Critical alarms">{project.criticalAlarms} critical</span>}</div></td>
                 <td>{project.meteoStations}</td>
-                <td>{project.powerMWdc}</td>
+                <td>{isSkylinkProject(project) ? 'N/A' : project.powerMWdc}</td>
                 <td>{project.blindingPercent}%</td>
                 <td><Badge variant={getStatusTone(project.status)}>{project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : getPlantStatusLabel(project.status)}</Badge></td>
               </tr>
