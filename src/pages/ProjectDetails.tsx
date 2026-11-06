@@ -111,20 +111,6 @@ const ProjectDetails = () => {
     }
   })
 
-  const downloadCsv = (filename: string, rows: (string | number)[][]) => {
-    const escapeCell = (value: string | number) => {
-      const text = String(value)
-      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
-    }
-    const blob = new Blob([rows.map((row) => row.map(escapeCell).join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    link.click()
-    URL.revokeObjectURL(url)
-  }
-
   const statusLabel = project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : getPlantStatusLabel(project.status)
   const deviceTypeOptions = [...new Set(projectDevices.map((device) => device.type))]
 
@@ -280,17 +266,6 @@ const ProjectDetails = () => {
           )}
         </section>
       )}
-
-      {activeSection === 'reports' && (
-        <section className={styles.panel}>
-          <PanelHeader title="Project Reports" detail="Download project data as CSV" />
-          <div className={styles.reportGrid}>
-            <ReportCard title="Device Inventory" description="Devices, status, and last communication." onClick={() => downloadCsv(`${project.id}-devices.csv`, [['Device ID', 'Type', 'Status', 'Communication'], ...projectDevices.map((device) => [device.id, device.type, device.status, device.communication])])} />
-            <ReportCard title="Alarm Summary" description="Project alarms and their current status." onClick={() => downloadCsv(`${project.id}-alarms.csv`, [['Alarm ID', 'Severity', 'Device', 'Description', 'Status'], ...projectAlarms.map((alarm) => [alarm.id, alarm.severity, alarm.deviceId, alarm.title, alarm.status])])} />
-            <ReportCard title="Battery Inventory" description="Battery charge, health, temperature, and status." onClick={() => downloadCsv(`${project.id}-batteries.csv`, [['Battery ID', 'SOC', 'SOH', 'Temperature', 'Status'], ...projectBatteries.map((battery) => [battery.id, battery.soc, battery.soh, battery.temperature, battery.status])])} />
-          </div>
-        </section>
-      )}
     </div>
   )
 }
@@ -345,7 +320,5 @@ const BatteryTable = ({ batteries, onTelemetry }: { batteries: ReturnType<typeof
 const TelemetryChart = ({ title, data, dataKey, color, suffix }: { title: string; data: { day: string; soc: number; soh: number; temperature: number }[]; dataKey: 'soc' | 'soh' | 'temperature'; color: string; suffix: string }) => (
   <section className={styles.panel}><PanelHeader title={title} /><div className={styles.chart}><ResponsiveContainer width="100%" height="100%"><AreaChart data={data}><CartesianGrid stroke="#e4eaf0" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#718598' }} /><YAxis tickFormatter={(value) => `${value}${suffix}`} tick={{ fontSize: 9, fill: '#718598' }} /><Tooltip formatter={(value) => `${value}${suffix}`} /><Area type="monotone" dataKey={dataKey} stroke={color} fill={`${color}33`} strokeWidth={2} /></AreaChart></ResponsiveContainer></div></section>
 )
-
-const ReportCard = ({ title, description, onClick }: { title: string; description: string; onClick: () => void }) => <article className={styles.reportCard}><strong>{title}</strong><p>{description}</p><button className={styles.textButton} type="button" onClick={onClick}>Download CSV →</button></article>
 
 export default ProjectDetails

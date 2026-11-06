@@ -1,14 +1,13 @@
 import Badge from '@/components/Badge/Badge'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getCommStatus, getPlantStatusLabel, getStatusTone, useMonitoring, type Project } from '@/services/monitoringData'
+import { getPlantStatusLabel, getStatusTone, useMonitoring, type Project } from '@/services/monitoringData'
 import styles from './Projects.module.css'
 
 const PAGE_SIZE = 10
 const alarmTypeOptions = ['critical', 'warning', 'info'] as const
 
 const uniqueSorted = (values: string[]) => Array.from(new Set(values)).sort((a, b) => a.localeCompare(b))
-
 const Projects = () => {
   const navigate = useNavigate()
   const { projects } = useMonitoring()
