@@ -162,6 +162,32 @@
   color: #e82235;
 }
 
+.statusCell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.statusSignals {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusSignal {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #dfe8ef;
+  box-shadow: 0 0 0 1px rgba(73, 100, 122, 0.18);
+}
+
+.statusGood { background: #20c366; }
+.statusWarning { background: #ffb400; }
+.statusCritical { background: #ff353c; }
+.statusOffline { background: #8095a4; }
+
 .tableWrap :global(.badge) {
   padding: 4px 8px;
   font-size: 9px;

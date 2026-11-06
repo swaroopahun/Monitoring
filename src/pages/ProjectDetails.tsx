@@ -48,16 +48,6 @@ const ProjectDetails = () => {
     && (alarmType === 'all' || projectAlarms.some((alarm) => alarm.deviceId === device.id && alarm.severity === alarmType)),
   )
 
-  const seed = useMemo(() => hashSeed(project.id), [project.id])
-  const weather = {
-    temperature: 62 + seed % 32,
-    condition: ['Sunny', 'Clear', 'Partly Cloudy', 'Windy'][seed % 4],
-    wind: 3 + seed % 14,
-    humidity: 18 + seed % 55,
-    precipitation: seed % 30,
-    snow: seed % 3 === 0 ? 'Light snow' : 'No snow',
-  }
-
   const averageSoc = projectBatteries.length
     ? Math.round(projectBatteries.reduce((sum, battery) => sum + battery.soc, 0) / projectBatteries.length)
     : null
@@ -194,16 +184,187 @@ const ProjectDetails = () => {
 
       {activeSection === 'weather' && (
         <section className={styles.panel}>
-          <PanelHeader title="Current Weather" detail={project.location} />
-          <div className={styles.weatherGrid}>
-            <WeatherCard icon="🌡" label="Temperature" value={`${weather.temperature}°F`} tone="amber" />
-            <WeatherCard icon="☀" label="Conditions" value={weather.condition} tone="gold" />
-            <WeatherCard icon="≋" label="Wind" value={`${weather.wind} mph`} tone="blue" />
-            <WeatherCard icon="♧" label="Humidity" value={`${weather.humidity}%`} tone="green" />
-            <WeatherCard icon="☂" label="Precipitation Chance" value={`${weather.precipitation}%`} tone="purple" />
-            <WeatherCard icon="❄" label="Snow" value={weather.snow} tone="cyan" />
+          <div className={styles.weatherHeaderRow}>
+            <h2>Field Meteorological</h2>
+            <span>2 Active Units</span>
           </div>
-          <p className={styles.dataNote}>Weather values are illustrative; connect a weather provider for live site conditions.</p>
+
+          <div className={styles.weatherTableWrap}>
+            <table className={styles.weatherTable}>
+              <thead>
+                <tr>
+                  <th>Station / Location</th>
+                  <th>Status</th>
+                  <th>Temperature</th>
+                  <th>Conditions</th>
+                  <th>Wind</th>
+                  <th>Humidity</th>
+                  <th>Precipitation</th>
+                  <th>Dew Point</th>
+                  <th>Irradiance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Met Station 01 - North Array</strong><small>Block 1</small></td>
+                  <td><span className={styles.weatherStatusOnline}>Online</span></td>
+                  <td>69°F</td>
+                  <td>Windy</td>
+                  <td>10 mph</td>
+                  <td>44%</td>
+                  <td>0%</td>
+                  <td>No Snow</td>
+                  <td>342 W/m²</td>
+                </tr>
+                <tr>
+                  <td><strong>Met Station 02 - Substation</strong><small>Tracker Block 4</small></td>
+                  <td><span className={styles.weatherStatusOnline}>Online</span></td>
+                  <td>72°F</td>
+                  <td>Clear / Breezy</td>
+                  <td>14 mph</td>
+                  <td>38%</td>
+                  <td>0%</td>
+                  <td>No Snow</td>
+                  <td>365 W/m²</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className={styles.weatherDashboardGrid}>
+            <div className={styles.weatherLargeCard}>
+              <div className={styles.weatherCardHeader}>
+                <h3>Wind Rose (Direction &amp; Frequency Distribution)</h3>
+                <span>Dominant: SSE (158°)</span>
+              </div>
+              <div className={styles.windRoseWrap}>
+                <svg viewBox="0 0 320 260" className={styles.windRoseSvg} aria-label="Wind rose chart">
+                  <g>
+                    <circle cx="160" cy="130" r="80" fill="none" stroke="#dfeaf3" />
+                    <circle cx="160" cy="130" r="58" fill="none" stroke="#eef3f8" />
+                    <circle cx="160" cy="130" r="36" fill="none" stroke="#eef3f8" />
+                    <line x1="160" y1="50" x2="160" y2="210" stroke="#e8edf4" />
+                    <line x1="80" y1="130" x2="240" y2="130" stroke="#e8edf4" />
+                    <line x1="106" y1="76" x2="214" y2="184" stroke="#e8edf4" />
+                    <line x1="214" y1="76" x2="106" y2="184" stroke="#e8edf4" />
+                  </g>
+                  <g>
+                    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
+                      const radians = (angle - 90) * (Math.PI / 180)
+                      const x = 160 + Math.cos(radians) * 98
+                      const y = 130 + Math.sin(radians) * 98
+                      return <line key={angle} x1="160" y1="130" x2={x} y2={y} stroke="#dfe7ef" strokeWidth="1" />
+                    })}
+                  </g>
+                  <g>
+                    {[
+                      { angle: 90, length: 58, color: '#4e7df9' },
+                      { angle: 20, length: 48, color: '#9b8ef7' },
+                      { angle: 120, length: 64, color: '#f7ad3c' },
+                      { angle: 160, length: 74, color: '#ff4f5d' },
+                      { angle: 210, length: 55, color: '#29c07e' },
+                    ].map((segment) => {
+                      const radians = (segment.angle - 90) * (Math.PI / 180)
+                      const x2 = 160 + Math.cos(radians) * segment.length
+                      const y2 = 130 + Math.sin(radians) * segment.length
+                      return <line key={segment.angle} x1="160" y1="130" x2={x2} y2={y2} stroke={segment.color} strokeWidth="3" strokeLinecap="round" />
+                    })}
+                  </g>
+                  <g fill="#4f6479" fontSize="10" textAnchor="middle">
+                    <text x="160" y="34">N</text>
+                    <text x="160" y="226">S</text>
+                    <text x="274" y="136">E</text>
+                    <text x="46" y="136">W</text>
+                  </g>
+                </svg>
+              </div>
+              <div className={styles.legendRow}>
+                <span><i className={styles.swatchBlue} /> 0–5 mph</span>
+                <span><i className={styles.swatchLightBlue} /> 5–10 mph</span>
+                <span><i className={styles.swatchAmber} /> 10–15 mph</span>
+                <span><i className={styles.swatchRed} /> &gt;15 mph</span>
+              </div>
+            </div>
+
+            <div className={styles.weatherLargeCard}>
+              <div className={styles.weatherCardHeader}>
+                <h3>Wind Speed &amp; Gust Profile</h3>
+                <span>Station 01 · 24h forecast</span>
+              </div>
+              <svg viewBox="0 0 420 200" className={styles.lineChartSvg} aria-label="Wind speed chart">
+                <g stroke="#e5edf4" strokeWidth="1">
+                  {[0, 1, 2, 3, 4].map((row) => (
+                    <line key={row} x1="30" x2="380" y1={30 + row * 32} y2={30 + row * 32} />
+                  ))}
+                </g>
+                <path d="M30 135 C 75 120, 95 96, 120 110 S 170 120, 200 92 S 260 98, 300 72 S 350 76, 380 62 L 380 172 L 30 172 Z" fill="#dbeeff" opacity="0.8" />
+                <path d="M30 138 C 75 120, 95 98, 120 110 S 170 118, 200 92 S 260 98, 300 72 S 350 78, 380 64" fill="none" stroke="#3d8af7" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M30 83 C 80 90, 105 78, 130 86 S 175 102, 210 98 S 280 62, 330 72 S 360 80, 380 74" fill="none" stroke="#f5b33a" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="6 6" />
+                <g fill="#718598" fontSize="10">
+                  {['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'].map((label, index) => (
+                    <text key={label} x={38 + index * 54} y="190" textAnchor="middle">{label}</text>
+                  ))}
+                </g>
+              </svg>
+              <div className={styles.chartSummaryRow}>
+                <div>
+                  <strong>Peak Record: 22.4 mph (13:40)</strong>
+                </div>
+                <div>
+                  <strong>Safe Margin: 12.8 mph below snow limit</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.weatherLargeCard}>
+              <div className={styles.weatherCardHeader}>
+                <h3>Wind Direction History (0° - 360°)</h3>
+                <span>Tracker way alignment vector correction</span>
+              </div>
+              <svg viewBox="0 0 420 165" className={styles.lineChartSvg} aria-label="Wind direction chart">
+                <g stroke="#e8edf3" strokeWidth="1">
+                  {[0, 1, 2, 3, 4].map((row) => (
+                    <line key={row} x1="30" x2="380" y1={24 + row * 30} y2={24 + row * 30} />
+                  ))}
+                </g>
+                <path d="M30 120 C 90 90, 120 72, 150 105 S 220 142, 260 128 S 330 90, 380 98" fill="none" stroke="#8c74ff" strokeWidth="2.5" strokeLinecap="round" />
+                <g fill="#6b7d8f" fontSize="10">
+                  {['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'].map((label, index) => (
+                    <text key={label} x={38 + index * 54} y="152" textAnchor="middle">{label}</text>
+                  ))}
+                </g>
+              </svg>
+              <div className={styles.miniLegend}>
+                <span><i className={styles.swatchPurple} /> Met Station 01</span>
+                <span><i className={styles.swatchGray} /> Met Station 02</span>
+              </div>
+            </div>
+
+            <div className={styles.weatherLargeCard}>
+              <div className={styles.weatherCardHeader}>
+                <h3>Solar Irradiance Profile (Daily Curve)</h3>
+                <span>GHI: 0.4 kW/m² · POA: 1.8 kW/m²</span>
+              </div>
+              <svg viewBox="0 0 420 180" className={styles.lineChartSvg} aria-label="Solar irradiance chart">
+                <g stroke="#e8edf3" strokeWidth="1">
+                  {[0, 1, 2, 3, 4].map((row) => (
+                    <line key={row} x1="30" x2="380" y1={20 + row * 28} y2={20 + row * 28} />
+                  ))}
+                </g>
+                <path d="M25 120 C 70 70, 110 38, 170 45 S 265 104, 330 76 S 360 40, 380 42 L 380 150 L 25 150 Z" fill="#fbe7b2" opacity="0.65" />
+                <path d="M25 120 C 70 70, 110 38, 170 45 S 265 104, 330 76 S 360 40, 380 42" fill="none" stroke="#f2a600" strokeWidth="3" strokeLinecap="round" />
+                <g fill="#718598" fontSize="10">
+                  {['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '24:00'].map((label, index) => (
+                    <text key={label} x={38 + index * 28} y="168" textAnchor="middle">{label}</text>
+                  ))}
+                </g>
+              </svg>
+              <div className={styles.chartSummaryRow}>
+                <div><strong>Daily Cumulative Energy: 8.62 kWh/m²</strong></div>
+                <div><strong>Tracking Advantage: Single-Axis Tracking</strong></div>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 
@@ -302,15 +463,6 @@ const DeviceTable = ({ devices, alarms, onSelect }: { devices: Device[]; alarms:
   </div>
 )
 
-const WeatherCard = ({ icon, label, value, tone }: { icon: string; label: string; value: string; tone: 'amber' | 'gold' | 'blue' | 'green' | 'purple' | 'cyan' }) => (
-  <div className={`${styles.weatherCard} ${styles[tone]}`}>
-    <div className={styles.weatherMeta}>
-      <span className={styles.weatherIcon}>{icon}</span>
-      <span>{label}</span>
-    </div>
-    <strong>{value}</strong>
-  </div>
-)
 
 const BatteryDonut = ({ title, data, center, caption }: { title: string; data: { name: string; value: number; color: string }[]; center: string; caption: string }) => (
   <section className={styles.panel}>

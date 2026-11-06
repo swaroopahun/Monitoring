@@ -1,7 +1,6 @@
-import Badge from '@/components/Badge/Badge'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPlantStatusLabel, getStatusTone, useMonitoring, type Project } from '@/services/monitoringData'
+import { getPlantStatusLabel, useMonitoring, type Project } from '@/services/monitoringData'
 import styles from './Projects.module.css'
 
 const PAGE_SIZE = 10
@@ -53,6 +52,23 @@ const Projects = () => {
   const openProject = (project: Project) => navigate(`/project-details/${project.id}`)
   const isSkylinkProject = (project: Project) => project.supplier === 'Skylink'
 
+  const renderProjectStatus = (project: Project) => {
+    const isHealthy = project.status === 'healthy'
+    const isWarning = project.status === 'warning'
+    const isCritical = project.status === 'critical'
+    const isOffline = project.status === 'offline'
+
+    return (
+      <div className={styles.statusCell}>
+        <div className={styles.statusSignals}>
+          <span className={`${styles.statusSignal} ${isHealthy ? styles.statusGood : ''} ${isWarning ? styles.statusWarning : ''} ${isCritical ? styles.statusCritical : ''} ${isOffline ? styles.statusOffline : ''}`} aria-label={project.status} />
+          {project.criticalAlarms > 0 && <span className={`${styles.statusSignal} ${styles.statusCritical}`} aria-label="Critical alarms" />}
+          {project.activeAlarms > 0 && <span className={`${styles.statusSignal} ${styles.statusWarning}`} aria-label="Active alarms" />}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.projects}>
       <div className={styles.header}>
@@ -87,7 +103,7 @@ const Projects = () => {
               <th>Customer Name</th>
               <th>Country</th>
               <th>Region</th>
-              <th>Gateway</th>
+              <th>Zone Controller</th>
               <th>Tracker</th>
               <th>Repeater</th>
               <th>Weather Stations</th>
@@ -107,8 +123,8 @@ const Projects = () => {
                 <td>{project.concentrators}</td>
                 <td>{project.devicesTotal}<div className={styles.alarmTags}>{project.activeAlarms > 0 && <span title="Active device alarms">{project.activeAlarms} active</span>}{project.criticalAlarms > 0 && <span className={styles.criticalTag} title="Critical alarms">{project.criticalAlarms} critical</span>}</div></td>
                 <td>{project.meteoStations}</td>
-                <td>{isSkylinkProject(project) ? 'N/A' : project.powerMWdc}</td>
-                <td><Badge variant={getStatusTone(project.status)}>{project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : getPlantStatusLabel(project.status)}</Badge></td>
+                <td>{isSkylinkProject(project) ? 'N/A' : Number(project.powerMWdc).toString()}</td>
+                <td>{renderProjectStatus(project)}</td>
               </tr>
             ))}
             {pageRows.length === 0 && <tr><td colSpan={12} className={styles.empty}>No projects match the current filters.</td></tr>}

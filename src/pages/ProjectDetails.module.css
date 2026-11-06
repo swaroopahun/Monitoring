@@ -340,60 +340,177 @@
 .versionRow + .versionRow { margin-top: 6px; }
 .versionRow small { color: #8294a2; }
 
-.weatherGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.weatherCard {
-  min-height: 104px;
-  padding: 12px 12px 10px;
-  border: 1px solid #e2e9ed;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  box-shadow: inset 0 0 0 1px rgba(122, 146, 168, 0.03);
-}
-
-.weatherCard.amber { border-left: 3px solid #f6b42f; }
-.weatherCard.gold { border-left: 3px solid #f0a91b; }
-.weatherCard.blue { border-left: 3px solid #3f8af4; }
-.weatherCard.green { border-left: 3px solid #22b36b; }
-.weatherCard.purple { border-left: 3px solid #8d74ff; }
-.weatherCard.cyan { border-left: 3px solid #3ba9d9; }
-
-.weatherMeta {
+.weatherHeaderRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #607587;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.weatherHeaderRow h2 {
+  margin: 0;
+  color: #233b4e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.weatherHeaderRow span {
+  color: #5d7385;
+  font-size: 10px;
+}
+
+.weatherTableWrap {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.weatherTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.weatherTable th {
+  padding: 8px 10px;
+  border-bottom: 1px solid #dfe9f0;
+  color: #637b8a;
+  background: #f9fbfd;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.weatherTable td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #edf2f6;
+  color: #4f6479;
+}
+
+.weatherTable td strong {
+  display: block;
+  color: #243b4d;
   font-size: 11px;
 }
 
-.weatherIcon {
+.weatherTable td small {
+  display: block;
+  color: #6b8494;
+  font-size: 10px;
+}
+
+.weatherStatusOnline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #fff5dc;
-  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: #1f9d68;
+  background: rgba(32, 195, 102, 0.12);
+  font-size: 10px;
+  font-weight: 600;
 }
 
-.amber .weatherIcon { background: #fff0c7; color: #dc8a00; }
-.gold .weatherIcon { background: #fff1c8; color: #d18a00; }
-.blue .weatherIcon { background: #e8f1ff; color: #2c6fe4; }
-.green .weatherIcon { background: #eafaf1; color: #1d9d60; }
-.purple .weatherIcon { background: #f1edff; color: #6e58d9; }
-.cyan .weatherIcon { background: #e9f9ff; color: #218cc0; }
+.weatherDashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
 
-.weatherCard strong {
+.weatherLargeCard {
+  min-width: 0;
+  padding: 14px 14px 10px;
+  border: 1px solid #dde6ee;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.weatherCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.weatherCardHeader h3 {
+  margin: 0;
+  color: #2d4358;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.weatherCardHeader span {
+  color: #7a8d9d;
+  font-size: 10px;
+}
+
+.windRoseWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+}
+
+.windRoseSvg,
+.lineChartSvg {
+  width: 100%;
+  height: auto;
   display: block;
-  margin-top: 14px;
-  color: #263c4d;
-  font-size: 18px;
-  line-height: 1.2;
+}
+
+.legendRow,
+.miniLegend,
+.chartSummaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-top: 8px;
+  color: #657a8a;
+  font-size: 10px;
+}
+
+.legendRow span,
+.miniLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendRow i,
+.miniLegend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.swatchBlue { background: #4e7df9; }
+.swatchLightBlue { background: #9ec4ff; }
+.swatchAmber { background: #f3b32c; }
+.swatchRed { background: #ef4f55; }
+.swatchPurple { background: #8f74ff; }
+.swatchGray { background: #98a7b3; }
+
+.chartSummaryRow {
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #edf2f6;
+}
+
+.chartSummaryRow strong {
+  color: #49647a;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .weatherDashboardGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .alarmSummary {
