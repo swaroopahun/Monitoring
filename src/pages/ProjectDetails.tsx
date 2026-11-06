@@ -138,7 +138,7 @@ const ProjectDetails = () => {
 
       <section className={styles.projectMetrics} aria-label="Project metrics">
         <Metric label="Total Devices" value={project.devicesTotal.toLocaleString()} detail={`${project.devicesOnline} online · ${offlineDevices} offline`} />
-        <Metric label="Installed Power" value={isSkylinkProject ? 'N/A' : `${project.powerMWdc} MW`} />
+        <Metric label="Installed Power" value={isSkylinkProject ? 'N/A' : `${project.powerMWdc}`} />
         <Metric label="Active Alarms" value={projectAlarms.filter((alarm) => alarm.status !== 'resolved').length.toString()} detail={`${project.criticalAlarms} critical`} alert={project.criticalAlarms > 0} />
         <Metric label="Total Batteries" value={isSkylinkProject ? 'N/A' : (totalBatteryCount ? totalBatteryCount.toString() : 'N/A')} detail={project.supplier} />
         <Metric label="Operational Batteries" value={isSkylinkProject ? 'N/A' : projectBatteries.filter((battery) => battery.status === 'online').length.toString()} detail={isSkylinkProject ? 'Battery data unavailable' : `${projectBatteries.filter((battery) => battery.status !== 'online').length} need attention`} />
@@ -196,12 +196,12 @@ const ProjectDetails = () => {
         <section className={styles.panel}>
           <PanelHeader title="Current Weather" detail={project.location} />
           <div className={styles.weatherGrid}>
-            <WeatherCard icon="🌡" label="Temperature" value={`${weather.temperature}°F`} />
-            <WeatherCard icon="☀" label="Conditions" value={weather.condition} />
-            <WeatherCard icon="≋" label="Wind" value={`${weather.wind} mph`} />
-            <WeatherCard icon="♧" label="Humidity" value={`${weather.humidity}%`} />
-            <WeatherCard icon="☂" label="Precipitation Chance" value={`${weather.precipitation}%`} />
-            <WeatherCard icon="❄" label="Snow" value={weather.snow} />
+            <WeatherCard icon="🌡" label="Temperature" value={`${weather.temperature}°F`} tone="amber" />
+            <WeatherCard icon="☀" label="Conditions" value={weather.condition} tone="gold" />
+            <WeatherCard icon="≋" label="Wind" value={`${weather.wind} mph`} tone="blue" />
+            <WeatherCard icon="♧" label="Humidity" value={`${weather.humidity}%`} tone="green" />
+            <WeatherCard icon="☂" label="Precipitation Chance" value={`${weather.precipitation}%`} tone="purple" />
+            <WeatherCard icon="❄" label="Snow" value={weather.snow} tone="cyan" />
           </div>
           <p className={styles.dataNote}>Weather values are illustrative; connect a weather provider for live site conditions.</p>
         </section>
@@ -302,7 +302,15 @@ const DeviceTable = ({ devices, alarms, onSelect }: { devices: Device[]; alarms:
   </div>
 )
 
-const WeatherCard = ({ icon, label, value }: { icon: string; label: string; value: string }) => <div className={styles.weatherCard}><span>{icon} {label}</span><strong>{value}</strong></div>
+const WeatherCard = ({ icon, label, value, tone }: { icon: string; label: string; value: string; tone: 'amber' | 'gold' | 'blue' | 'green' | 'purple' | 'cyan' }) => (
+  <div className={`${styles.weatherCard} ${styles[tone]}`}>
+    <div className={styles.weatherMeta}>
+      <span className={styles.weatherIcon}>{icon}</span>
+      <span>{label}</span>
+    </div>
+    <strong>{value}</strong>
+  </div>
+)
 
 const BatteryDonut = ({ title, data, center, caption }: { title: string; data: { name: string; value: number; color: string }[]; center: string; caption: string }) => (
   <section className={styles.panel}>

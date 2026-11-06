@@ -23,7 +23,6 @@ const DeviceDetail = () => {
   const isSkylinkProject = project?.supplier === 'Skylink'
   const statusText = isOffline ? 'Disabled' : device.status === 'warning' ? 'Warning' : 'Enabled'
   const communicationText = device.communication === 'Lost' ? 'No Communication' : `${device.communication} Communication`
-  const bindingPercent = project?.blindingPercent ?? 0
   const capacity = battery ? Math.max(100, Math.round(battery.voltage * 5.55)) : 300
   const charge = battery?.soc ?? Math.max(0, Math.min(100, Math.round(100 - device.temperature * 1.8)))
   const trackerAngle = -20.9 + (device.id.length % 8) * 0.3
@@ -157,7 +156,6 @@ const DeviceDetail = () => {
             <h2>Status</h2>
             <div className={styles.statusInfo}>
               <Reading label="Status" value={statusText} />
-              <Reading label="Binding Percentage" value={`${bindingPercent}%`} />
             </div>
           </article>
           <article className={`${styles.panel} ${styles.powerPanel}`}>

@@ -17,7 +17,6 @@ const Projects = () => {
   const [region, setRegion] = useState('all')
   const [projectStatus, setProjectStatus] = useState('all')
   const [family, setFamily] = useState('all')
-  const [binding, setBinding] = useState('all')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
 
@@ -39,9 +38,8 @@ const Projects = () => {
     const matchesRegion = region === 'all' || project.region === region
     const matchesProjectStatus = projectStatus === 'all' || project.status === projectStatus
     const matchesFamily = family === 'all' || project.supplier === family
-    const matchesBinding = binding === 'all' || (binding === 'below' ? project.blindingPercent < 50 : project.blindingPercent >= 50)
-    return matchesSearch && matchesAlarmType && matchesCustomer && matchesCountry && matchesRegion && matchesProjectStatus && matchesFamily && matchesBinding
-  }), [projects, search, alarmType, customer, country, region, projectStatus, family, binding])
+    return matchesSearch && matchesAlarmType && matchesCustomer && matchesCountry && matchesRegion && matchesProjectStatus && matchesFamily
+  }), [projects, search, alarmType, customer, country, region, projectStatus, family])
 
   const totalPages = Math.max(1, Math.ceil(visibleProjects.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -71,7 +69,6 @@ const Projects = () => {
         <label><span>Region</span><select value={region} onChange={updateFilter(setRegion)}><option value="all">All</option>{regions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
         <label><span>Project Status</span><select value={projectStatus} onChange={updateFilter(setProjectStatus)}><option value="all">All</option><option value="healthy">{getPlantStatusLabel('healthy')}</option><option value="warning">{getPlantStatusLabel('warning')}</option><option value="critical">{getPlantStatusLabel('critical')}</option><option value="offline">{getPlantStatusLabel('offline')}</option></select></label>
         <label><span>Supplier</span><select value={family} onChange={updateFilter(setFamily)}><option value="all">All</option>{families.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-        <label><span>Binding</span><select value={binding} onChange={updateFilter(setBinding)}><option value="all">All</option><option value="below">Below 50%</option><option value="above">50% and above</option></select></label>
         <label><span>Project Name / ID</span><input type="search" aria-label="Search by project name or ID" placeholder="Search..." value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
       </div>
 
@@ -95,7 +92,6 @@ const Projects = () => {
               <th>Repeater</th>
               <th>Weather Stations</th>
               <th>Power (MWdc)</th>
-              <th>Binding %</th>
               <th>Project Status</th>
             </tr>
           </thead>
@@ -112,7 +108,6 @@ const Projects = () => {
                 <td>{project.devicesTotal}<div className={styles.alarmTags}>{project.activeAlarms > 0 && <span title="Active device alarms">{project.activeAlarms} active</span>}{project.criticalAlarms > 0 && <span className={styles.criticalTag} title="Critical alarms">{project.criticalAlarms} critical</span>}</div></td>
                 <td>{project.meteoStations}</td>
                 <td>{isSkylinkProject(project) ? 'N/A' : project.powerMWdc}</td>
-                <td>{project.blindingPercent}%</td>
                 <td><Badge variant={getStatusTone(project.status)}>{project.status === 'healthy' ? 'In Operation' : project.status === 'warning' ? 'Issues Detected' : getPlantStatusLabel(project.status)}</Badge></td>
               </tr>
             ))}
